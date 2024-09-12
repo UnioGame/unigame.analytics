@@ -1,5 +1,8 @@
+#if ANALYTICS_MYTRACKER
+
 namespace VN.Runtime.Services
 {
+    
     using Game.Runtime.Services.Analytics.Interfaces;
     using Game.Runtime.Services.Analytics.Runtime;
     using Mycom.Tracker.Unity;
@@ -39,6 +42,8 @@ namespace VN.Runtime.Services
         {
             MyTracker.TrackEvent(message.Name, message.Parameters);
         }
-
     }
+    
 }
+
+#endif

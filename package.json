@@ -9,7 +9,7 @@
   "homepage": "",
   "keywords": [
     "analytics",
-    "tool",
+    "tool"
   ],
   "dependencies": {
     "com.unity.addressables": "1.20.0",

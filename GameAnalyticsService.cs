@@ -14,7 +14,7 @@
         private List<IAnalyticsAdapter> _adapters = new();
 
         private AnalyticsModel _model;
-        private readonly IContext _context;
+        private IContext _context;
         private IAnalyticsMessageChannel _channel;
 
         public IAnalyticsModel Model => _model;
