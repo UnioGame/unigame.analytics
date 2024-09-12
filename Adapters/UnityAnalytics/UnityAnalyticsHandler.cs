@@ -20,7 +20,11 @@
 
         public sealed override void OnTrackEvent(IAnalyticsMessage message)
         {
-            AnalyticsService.Instance.RecordEvent(message as Event);
+            var unityEvent = new UnityEventMessage(message.Name);
+            foreach (var parameter in message.Parameters)
+                unityEvent[parameter.Key] = parameter.Value;
+            
+            AnalyticsService.Instance.RecordEvent(unityEvent);
             AnalyticsService.Instance.Flush();
         }
     }

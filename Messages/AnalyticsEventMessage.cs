@@ -10,9 +10,18 @@
     using UnityEngine.Device;
 
     [Serializable]
-    public class AnalyticsEventMessage : Event, IAnalyticsMessage
+    public class AnalyticsEventMessage : IAnalyticsMessage
     {
         public Dictionary<string, string> Parameters { get; } = new(8);
+        
+        
+        public AnalyticsEventMessage(string name, string groupId) 
+        {
+            Name = name;
+            GroupId = groupId;
+            DeviceModel = SystemInfo.deviceModel;
+        }
+
         
         public string Name
         {
@@ -34,15 +43,7 @@
             set
             {
                 Parameters[AnalyticsEventsNames.device_model] = value;
-                SetParameter(AnalyticsEventsNames.device_model, value);
             } 
-        }
-
-        public AnalyticsEventMessage(string name, string groupId) : base(name)
-        {
-            Name = name;
-            GroupId = groupId;
-            DeviceModel = SystemInfo.deviceModel;
         }
 
         public string this[string key] 

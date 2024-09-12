@@ -9,7 +9,6 @@
             set
             {
                 this[AnalyticsEventsNames.player_coins] = value.ToString();
-                SetParameter(AnalyticsEventsNames.player_coins, value);
             } 
         }
 
