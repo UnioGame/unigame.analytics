@@ -1,0 +1,20 @@
+{
+    "name": "game.analytics.adapter.mytracker",
+    "rootNamespace": "",
+    "references": [
+        "GUID:a0b431bd9232ee0439a3722ec36414ed",
+        "GUID:8e4577c9194c10845984cf27eb974fd1",
+        "GUID:5f2d5318d1fa03144b7319c2a57d3567",
+        "GUID:c099adbe2af59cc4aa2ad06bf817aac8",
+        "GUID:1c5a81befa27419fb889ccaa807ada8d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
