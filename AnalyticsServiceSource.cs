@@ -8,6 +8,7 @@
     using Interfaces;
     using Runtime;
     using UniGame.AddressableTools.Runtime;
+    using UniGame.AddressableTools.Runtime.AssetReferencies;
     using UniGame.Core.Runtime;
     using UniGame.GameFlow.Runtime.Services;
     using UniRx;
@@ -20,12 +21,14 @@
     [CreateAssetMenu(menuName = "Game/Services/Analytics/Analytics Service Source")]
     public class AnalyticsServiceSource : DataSourceAsset<IAnalyticsService>
     {
-        public AssetReferenceT<AnalyticsConfigurationAsset> configurationReference;
+        public AddressableValue<AnalyticsConfigurationAsset> configurationReference;
 
         protected override async UniTask<IAnalyticsService> CreateInternalAsync(IContext context)
         {
             var configurationAsset = await configurationReference
+                .reference
                 .LoadAssetInstanceTaskAsync(LifeTime, true);
+            
             var configuration = configurationAsset.configuration;
 
             var userId = Observable.Return(Application.identifier);
@@ -33,6 +36,12 @@
             var channel = AnalyticsMessageChannel.DefaultChannel;
             var service = await CreateService(context, model, configuration, context.LifeTime);
 
+            foreach (var messageHandler in configuration.messageHandlers)
+            {
+                await messageHandler.Initialize(context,LifeTime);
+                service.RegisterMessageHandler(messageHandler);
+            }
+            
             var fpsService = new FpsService.FpsService();
 
             context.Publish(fpsService);

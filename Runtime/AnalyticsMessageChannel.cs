@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using Interfaces;
+    using UniModules.UniCore.Runtime.Common;
     using UniModules.UniCore.Runtime.DataFlow;
     using UniRx;
     using UnityEngine;
@@ -40,12 +41,21 @@
 
         public void Dispose() => _lifeTime.Terminate();
 
+        public IDisposable RegisterMessageHandler(IAnalyticsMessageHandler handler)
+        {
+            if (_handlers.Contains(handler))
+                return Disposable.Empty;
+
+            _handlers.Add(handler);
+            
+            return new DisposableAction()
+                .Initialize(() => _handlers.Remove(handler));
+        }
 
         public IAnalyticsMessageChannel UpdateHandlers(IEnumerable<IAnalyticsMessageHandler> messageHandlers)
         {
             _handlers.Clear();
             _handlers.AddRange(messageHandlers);
-
             return this;
         }
 
@@ -71,7 +81,8 @@
 
         public IObservable<T> Receive<T>() => _broker.Receive<T>();
 
-        public IDisposable Subscribe(IObserver<IAnalyticsMessage> observer) => _shareConnection.Subscribe(observer);
+        public IDisposable Subscribe(IObserver<IAnalyticsMessage> observer) => 
+            _shareConnection.Subscribe(observer);
 
         public async UniTask PublishMessageAsync(IAnalyticsMessage message)
         {

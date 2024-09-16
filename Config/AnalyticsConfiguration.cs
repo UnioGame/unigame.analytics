@@ -3,7 +3,9 @@ namespace Game.Runtime.Services.Analytics.Runtime
     using System;
     using System.Collections.Generic;
     using Config;
+    using Interfaces;
     using Sirenix.OdinInspector;
+    using UnityEngine;
     using UnityEngine.AddressableAssets;
 
     [Serializable]
@@ -13,6 +15,9 @@ namespace Game.Runtime.Services.Analytics.Runtime
         
         [InlineProperty]
         public List<AssetReferenceT<AnalyticsAdapter>> analytics = new();
+        
+        [SerializeReference]
+        public List<IAnalyticsMessageHandler> messageHandlers = new();
         
         [TitleGroup("Analytics Model")]
         [InlineProperty]

@@ -18,6 +18,7 @@
 
         public IReadOnlyReactiveProperty<string> CustomerUserId => customerUserId;
         public IAnalyticsMessageChannel DefaultChannel => AnalyticsMessageChannel.DefaultChannel;
+        
         public IReactiveProperty<bool> IsDebug => isDebug;
         public ILifeTime LifeTime => _lifeTime ??= new LifeTimeDefinition();
         public IAnalyticsMessageChannel MessageChannel =>
