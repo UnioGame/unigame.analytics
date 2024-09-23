@@ -20,7 +20,9 @@
         public void BindToModel(IAnalyticsModel config)
         {
             _registeredTypes = new HashSet<Type>();
-            _messageChannel = new Subject<IAnalyticsMessage>().AddTo(LifeTime);
+            _messageChannel = new Subject<IAnalyticsMessage>()
+                .AddTo(LifeTime);
+            
             _model = config;
 
             _messageChannel

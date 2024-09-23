@@ -15,7 +15,7 @@ namespace VN.Runtime.Services
         public string AndroidKey;
         public bool IsDebug;
 
-        protected override async void OnInitialize(IAnalyticsModel config)
+        protected override void OnInitialize(IAnalyticsModel config)
         {
             var myTrackerConfig = MyTracker.MyTrackerConfig;
             MyTracker.IsDebugMode = IsDebug;

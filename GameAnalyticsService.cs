@@ -15,15 +15,13 @@
         private List<IAnalyticsAdapter> _adapters = new();
 
         private AnalyticsModel _model;
-        private IContext _context;
         private IAnalyticsMessageChannel _channel;
 
         public IAnalyticsModel Model => _model;
 
-        public GameAnalyticsService(AnalyticsModel model, IContext context)
+        public GameAnalyticsService(AnalyticsModel model)
         {
             _model = model;
-            _context = context;
             _channel = model.MessageChannel;
 
             InitializeMessageChannel(_channel);

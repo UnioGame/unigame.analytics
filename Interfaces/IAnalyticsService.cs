@@ -7,5 +7,7 @@ namespace Game.Runtime.Services.Analytics.Interfaces
     public interface IAnalyticsService : IGameService,IMessagePublisher,IAnalyticsHandlers
     {
         IAnalyticsModel Model { get; }
+
+        void RegisterAdapter(IAnalyticsAdapter adapter);
     }
 }

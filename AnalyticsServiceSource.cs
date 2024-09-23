@@ -59,8 +59,7 @@
             ILifeTime lifeTime)
         {
             if (!configuration.isEnabled)
-                return
-                    new GameAnalyticsService(model, context);
+                return new GameAnalyticsService(model);
 
             var analytics = await UniTask
                 .WhenAll(configuration.analytics
@@ -69,7 +68,7 @@
             foreach (var analyticsAdapter in analytics)
                 analyticsAdapter.AddTo(lifeTime);
 
-            var service = new GameAnalyticsService(model, context).AddTo(lifeTime);
+            var service = new GameAnalyticsService(model).AddTo(lifeTime);
 
             foreach (var analytic in analytics)
                 service.RegisterAdapter(analytic);
