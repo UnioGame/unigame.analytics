@@ -12,8 +12,9 @@
     [Serializable]
     public class AnalyticsEventMessage : IAnalyticsMessage
     {
-        public Dictionary<string, string> Parameters { get; } = new(8);
-        
+        public Dictionary<string, string> parameters = new();
+
+        public Dictionary<string, string> Parameters => parameters;
         
         public AnalyticsEventMessage(string name, string groupId) 
         {
@@ -21,7 +22,6 @@
             GroupId = groupId;
             DeviceModel = SystemInfo.deviceModel;
         }
-
         
         public string Name
         {
@@ -31,30 +31,27 @@
 
         public string GroupId
         {
-            get => Parameters.TryGetValue(AnalyticsEventsNames.group_id, out var parameter)
+            get => parameters.TryGetValue(AnalyticsEventsNames.group_id, out var parameter)
                 ? parameter
                 : string.Empty;
             
-            set => Parameters[AnalyticsEventsNames.group_id] = value;
+            set => this[AnalyticsEventsNames.group_id] = value;
         }
         
         public string DeviceModel
         {
-            set
-            {
-                Parameters[AnalyticsEventsNames.device_model] = value;
-            } 
+            set => this[AnalyticsEventsNames.device_model] = value;
         }
 
         public string this[string key] 
         {
-            get => Parameters.TryGetValue(key, out var value) ? value : string.Empty;
-            set => Parameters[key] = value;
+            get => parameters.TryGetValue(key, out var value) ? value : string.Empty;
+            set => parameters[key] = value;
         }
 
         public AnalyticsEventMessage Add(string key, string value)
         {
-            Parameters[key] = value;
+            parameters[key] = value;
             return this;
         }
         
