@@ -12,6 +12,7 @@ namespace Game.Runtime.Services.Analytics.Runtime
         public bool isEnabled = true;
         
         [Header("Analytics Adapters")]
+        [ListDrawerSettings(ListElementLabelName = "@name")]
         [SerializeReference]
         public List<AnalyticsAdapterData> analytics = new();
         
@@ -19,13 +20,5 @@ namespace Game.Runtime.Services.Analytics.Runtime
         [SerializeReference]
         public List<IAnalyticsMessageHandler> messageHandlers = new();
         
-    }
-
-    [Serializable]
-    public class AnalyticsAdapterData
-    {
-        public bool isEnabled = true;
-        [SerializeReference]
-        public IAnalyticsAdapter adapter;
     }
 }

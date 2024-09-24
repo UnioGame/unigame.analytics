@@ -3,6 +3,10 @@
     using Sirenix.OdinInspector;
     using UnityEngine;
 
+#if UNITY_EDITOR
+    using UniModules.Editor;
+#endif
+    
     [CreateAssetMenu(menuName = "Game/Services/Analytics/Analytics Configuration")]
     public class AnalyticsConfigurationAsset : ScriptableObject
     {
@@ -14,6 +18,14 @@
         {
             get => configuration.isEnabled;
             set => configuration.isEnabled = value;
+        }
+
+        [Button]
+        public void Save()
+        {
+#if UNITY_EDITOR
+            this.SaveAsset();
+#endif
         }
     }
 }
