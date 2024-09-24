@@ -1,24 +1,23 @@
 ﻿namespace Game.Runtime.Services.Analytics.Adapters.UnityAnalytics
 {
+    using System;
+    using Cysharp.Threading.Tasks;
     using Interfaces;
-    using Runtime;
     using Unity.Services.Core;
-    using UnityEngine;
-    
+
 #if ANALYTICS_UNITY
-    using Event = Unity.Services.Analytics.Event;
     using Unity.Services.Analytics;
 
-    [CreateAssetMenu(menuName = "Game/Services/Analytics/Unity Analytics Adapter")]
-    public class UnityAnalyticsHandler : AnalyticsAdapter
+    [Serializable]
+    public class UnityAnalyticsHandler : IAnalyticsAdapter
     {
-        protected override async void OnInitialize(IAnalyticsModel config)
+        public async UniTask InitializeAsync()
         {
             await UnityServices.InitializeAsync();
             AnalyticsService.Instance.StartDataCollection();
         }
 
-        public sealed override void OnTrackEvent(IAnalyticsMessage message)
+        public void TrackEvent(IAnalyticsMessage message)
         {
             var unityEvent = new UnityEventMessage(message.Name);
             foreach (var parameter in message.Parameters)
@@ -27,14 +26,32 @@
             AnalyticsService.Instance.RecordEvent(unityEvent);
             AnalyticsService.Instance.Flush();
         }
+
+        public void Dispose()
+        {
+            
+        }
     }
 
 #else
 
-    [CreateAssetMenu(menuName = "Game/Services/Analytics/Unity Analytics")]
-    public class UnityAnalyticsHandler : AnalyticsAdapter
+    [Serializable]
+    public class UnityAnalyticsHandler : IAnalyticsAdapter
     {
-        
+        public void Dispose()
+        {
+            
+        }
+
+        public UniTask InitializeAsync()
+        {
+            return UniTask.CompletedTask;
+        }
+
+        public void TrackEvent(IAnalyticsMessage message)
+        {
+            
+        }
     }
 #endif    
 }

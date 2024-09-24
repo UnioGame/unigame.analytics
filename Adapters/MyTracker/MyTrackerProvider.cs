@@ -2,20 +2,20 @@
 
 namespace VN.Runtime.Services
 {
-    
+    using System;
+    using Cysharp.Threading.Tasks;
     using Game.Runtime.Services.Analytics.Interfaces;
-    using Game.Runtime.Services.Analytics.Runtime;
     using Mycom.Tracker.Unity;
     using UnityEngine;
 
-    [CreateAssetMenu(menuName = "Game/Services/Analytics/My Tracker Analytics")]
-    public sealed class MyTrackerProvider: AnalyticsAdapter
+    [Serializable]
+    public sealed class MyTrackerProvider: IAnalyticsAdapter
     {
         public string iOSKey;
         public string AndroidKey;
         public bool IsDebug;
 
-        protected override void OnInitialize(IAnalyticsModel config)
+        public UniTask InitializeAsync()
         {
             var myTrackerConfig = MyTracker.MyTrackerConfig;
             MyTracker.IsDebugMode = IsDebug;
@@ -32,15 +32,21 @@ namespace VN.Runtime.Services
             if (string.IsNullOrEmpty(AndroidKey))
             {
                 Debug.LogError("MyTrackerAnalytics AndroidKey is empty!");
-                return;
+                return UniTask.CompletedTask;
             }
             MyTracker.Init(AndroidKey);
 #endif
+            return UniTask.CompletedTask;
         }
 
-        public override void OnTrackEvent(IAnalyticsMessage message)
+        public void TrackEvent(IAnalyticsMessage message)
         {
             MyTracker.TrackEvent(message.Name, message.Parameters);
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
     

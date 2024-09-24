@@ -2,10 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using Config;
+    using Cysharp.Threading.Tasks;
     using Interfaces;
-    using Runtime;
-    using UniGame.Core.Runtime;
     using UniGame.UniNodes.GameFlow.Runtime;
     using UniRx;
 
@@ -13,48 +11,62 @@
     public class GameAnalyticsService : GameService, IAnalyticsService
     {
         private List<IAnalyticsAdapter> _adapters = new();
-
-        private AnalyticsModel _model;
-        private IAnalyticsMessageChannel _channel;
-
-        public IAnalyticsModel Model => _model;
-
-        public GameAnalyticsService(AnalyticsModel model)
+        private List<IAnalyticsMessageHandler> _handlers = new();
+        
+        public void TrackEvent(IAnalyticsMessage message)
         {
-            _model = model;
-            _channel = model.MessageChannel;
-
-            InitializeMessageChannel(_channel);
+            TrackEventAsync(message).Forget();
         }
 
         public IDisposable RegisterMessageHandler(IAnalyticsMessageHandler handler)
         {
-            return _channel.RegisterMessageHandler(handler);
+            if (_handlers.Contains(handler))
+                return Disposable.Empty;
+
+            _handlers.Add(handler);
+            
+            return Disposable.Create(() =>
+            {
+                if (_handlers.Contains(handler))
+                    _handlers.Remove(handler);
+            });
         }
 
-        public IAnalyticsMessageChannel UpdateHandlers(IEnumerable<IAnalyticsMessageHandler> messageHandlers)
+        public void UpdateHandlers(IEnumerable<IAnalyticsMessageHandler> messageHandlers)
         {
-            return _channel.UpdateHandlers(messageHandlers);
+            foreach (var messageHandler in messageHandlers)
+            {
+                RegisterMessageHandler(messageHandler);
+            }
         }
 
-        public void Publish<T>(T message) => _channel.Publish(message);
-        
-        public void RegisterAdapter(IAnalyticsAdapter adapter)
+        public IDisposable RegisterAdapter(IAnalyticsAdapter adapter)
         {
             if (_adapters.Contains(adapter))
-                return;
+                return Disposable.Empty;
 
             _adapters.Add(adapter);
+            
+            return Disposable.Create(() =>
+            {
+                if (_adapters.Contains(adapter))
+                    _adapters.Remove(adapter);
+            });
+        }
 
-            adapter.BindToModel(_model);
+        private async UniTask TrackEventAsync(IAnalyticsMessage message)
+        {
+            var data = message;
+            foreach (var handler in _handlers)
+                 data = await handler.UpdateMessageAsync(data);
+            PublishToAdapters(data);
         }
         
         private void InitializeMessageChannel(IAnalyticsMessageChannel channel)
         {
             channel.Subscribe(PublishToAdapters).AddTo(LifeTime);
         }
-
-
+        
         private void PublishToAdapters(IAnalyticsMessage message)
         {
             foreach (var adapter in _adapters)

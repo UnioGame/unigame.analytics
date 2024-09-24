@@ -7,6 +7,6 @@ namespace Game.Runtime.Services.Analytics.Runtime
     public interface IAnalyticsHandlers
     {
         IDisposable RegisterMessageHandler(IAnalyticsMessageHandler handler);
-        IAnalyticsMessageChannel UpdateHandlers(IEnumerable<IAnalyticsMessageHandler> messageHandlers);
+        void UpdateHandlers(IEnumerable<IAnalyticsMessageHandler> messageHandlers);
     }
 }

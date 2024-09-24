@@ -59,7 +59,7 @@
             return this;
         }
 
-        public void PublishMessage(IAnalyticsMessage message)
+        public void Publish(IAnalyticsMessage message)
         {
             PublishMessageAsync(message).Forget();
         }
@@ -89,7 +89,7 @@
             if (_lifeTime.IsTerminated) return;
 
             foreach (var handler in _handlers)
-                message = await handler.UpdateEventAsync(message);
+                message = await handler.UpdateMessageAsync(message);
 
             _messageSubject.OnNext(message);
         }

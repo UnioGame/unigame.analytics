@@ -1,13 +1,12 @@
 ﻿namespace Game.Runtime.Services.Analytics.Interfaces
 {
-    using UniGame.Core.Runtime;
+    using System;
+    using Cysharp.Threading.Tasks;
 
-    public interface IAnalyticsAdapter
+    public interface IAnalyticsAdapter : IDisposable
     {
-        ILifeTime AnalyticsLifetime { get; }
-
+        UniTask InitializeAsync();
+        
         void TrackEvent(IAnalyticsMessage message);
-
-        void BindToModel(IAnalyticsModel analyticsModel);
     }
 }

@@ -1,13 +1,12 @@
 namespace Game.Runtime.Services.Analytics.Interfaces
 {
+    using System;
     using Runtime;
     using UniGame.GameFlow.Runtime.Interfaces;
-    using UniRx;
 
-    public interface IAnalyticsService : IGameService,IMessagePublisher,IAnalyticsHandlers
+    public interface IAnalyticsService : IGameService,IAnalyticsHandlers
     {
-        IAnalyticsModel Model { get; }
-
-        void RegisterAdapter(IAnalyticsAdapter adapter);
+        void TrackEvent(IAnalyticsMessage message);
+        IDisposable RegisterAdapter(IAnalyticsAdapter adapter);
     }
 }

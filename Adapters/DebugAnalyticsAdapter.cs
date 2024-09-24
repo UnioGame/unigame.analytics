@@ -1,17 +1,26 @@
 ﻿namespace Game.Runtime.Services.Analytics.Debug
 {
-    using Game.Runtime.Services.Analytics.Interfaces;
-    using Runtime;
+    using System;
+    using Cysharp.Threading.Tasks;
+    using Interfaces;
     using UniCore.Runtime.ProfilerTools;
     using UnityEngine;
 
-    [CreateAssetMenu(menuName = "Game/Services/Analytics/Debug Adapter")]
-    public class DebugAnalyticsAdapter : AnalyticsAdapter
+    [Serializable]
+    public class DebugAnalyticsAdapter : IAnalyticsAdapter
     {
-        public override void OnTrackEvent(IAnalyticsMessage message)
+        public void Dispose()
         {
-            if (!Model.IsDebug.Value) return;
             
+        }
+
+        public UniTask InitializeAsync()
+        {
+            return UniTask.CompletedTask;
+        }
+
+        public void TrackEvent(IAnalyticsMessage message)
+        {
             GameLog.LogRuntime(message.ToString(),Color.yellow);
         }
     }
