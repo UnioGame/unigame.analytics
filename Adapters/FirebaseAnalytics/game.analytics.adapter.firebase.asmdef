@@ -1,0 +1,25 @@
+{
+    "name": "game.analytics.adapter.firebase",
+    "rootNamespace": "",
+    "references": [
+        "GUID:a0b431bd9232ee0439a3722ec36414ed",
+        "GUID:8e4577c9194c10845984cf27eb974fd1",
+        "GUID:1c5a81befa27419fb889ccaa807ada8d",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.google.firebase.analytics",
+            "expression": "",
+            "define": "ANALYTICS_GOOGLE"
+        }
+    ],
+    "noEngineReferences": false
+}
