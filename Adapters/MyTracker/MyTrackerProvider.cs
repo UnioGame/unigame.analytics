@@ -41,6 +41,7 @@ namespace VN.Runtime.Services
 
         public void TrackEvent(IAnalyticsMessage message)
         {
+            if(Application.isEditor) return;
             MyTracker.TrackEvent(message.Name, message.Parameters);
         }
 
