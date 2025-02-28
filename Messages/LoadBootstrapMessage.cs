@@ -8,7 +8,7 @@
         {
             set
             {
-                this[AnalyticsEventsNames.player_coins] = value.ToString();
+                this[AnalyticsEventsNames.coins] = value.ToString();
             } 
         }
 

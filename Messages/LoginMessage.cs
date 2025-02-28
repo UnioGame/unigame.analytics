@@ -1,19 +1,14 @@
 ﻿namespace Game.Runtime.Services.Analytics.Messages
 {
+    using System;
     using Runtime;
 
+    [Serializable]
     public class LoginMessage : AnalyticsEventMessage
     {
-        public int PlayerCoins
+        public LoginMessage() : base(AnalyticsEventsNames.login, AnalyticsEventsNames.session_group)
         {
-            set
-            {
-                this[AnalyticsEventsNames.player_coins] = value.ToString();
-            } 
-        }
-
-        public LoginMessage(string name) : base(name, name)
-        {
+            
         }
     }
 }

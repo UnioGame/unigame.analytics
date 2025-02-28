@@ -5,8 +5,6 @@
     using Interfaces;
     using Runtime;
     using Newtonsoft.Json;
-    using UniModules.UniCore.Runtime.Utils;
-    using Unity.Services.Analytics;
     using UnityEngine.Device;
 
     [Serializable]
@@ -38,9 +36,29 @@
             set => this[AnalyticsEventsNames.group_id] = value;
         }
         
+        
+        public string UserId
+        {
+            set => this[AnalyticsEventsNames.user_id] = value;
+            get => this[AnalyticsEventsNames.user_id];
+        }
+
+                
+        public string EventSource
+        {
+            set => this[AnalyticsEventsNames.event_source] = value;
+            get => this[AnalyticsEventsNames.event_source];
+        }
+        
         public string DeviceModel
         {
             set => this[AnalyticsEventsNames.device_model] = value;
+        }
+        
+        
+        public string SceneName
+        {
+            set => this[AnalyticsEventsNames.scene_name] = value;
         }
 
         public string this[string key] 
