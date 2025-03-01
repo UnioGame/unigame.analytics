@@ -20,9 +20,8 @@ namespace Game.Modules.Analytics
     {
         public AssetReferenceGameObject gameAnalyticsPrefab;
 
-        public string UserIdField = "UserId";
-        public string AdName;
-
+        public bool enableUnderEditor = false;
+        
         [ReadOnly]
         public string UserIdInfo;
         
@@ -32,11 +31,15 @@ namespace Game.Modules.Analytics
         
         public async UniTask InitializeAsync()
         {
+            if(Application.isEditor && !enableUnderEditor)
+                return;
+            
             _lifeTime?.Release();
             _lifeTime = new LifeTime();
             
             _gameAnalytics = await gameAnalyticsPrefab
                 .InstantiateTaskAsync<GameAnalytics>(_lifeTime,true);
+            _gameAnalytics.gameObject.SetActive(true);
             
             Object.DontDestroyOnLoad(_gameAnalytics.gameObject);
             
@@ -52,6 +55,9 @@ namespace Game.Modules.Analytics
 
         public void TrackEvent(IAnalyticsMessage message)
         {
+            if(Application.isEditor && !enableUnderEditor)
+                return;
+            
             SetupUserId(message);
 
             if(message is PaymentEventMessage { Name: AnalyticsEventsNames.payment_complete } purchaseMessage)
@@ -201,7 +207,7 @@ namespace Game.Modules.Analytics
         {
             if(_isUserIdInitialized) return;
 
-            UserIdInfo = message[UserIdField];
+            UserIdInfo = message[AnalyticsEventsNames.user_id];
             
             _isUserIdInitialized = string.IsNullOrEmpty(UserIdInfo) == false;
             
