@@ -8,7 +8,7 @@ namespace Game.Modules.Analytics
     [Serializable]
     public class PaymentEventMessage : AnalyticsEventMessage
     {
-        private int _price;
+        private float _price;
         
         public PaymentEventMessage(string eventName) 
             : base(eventName, AnalyticsEventsNames.shop_group)
@@ -16,7 +16,7 @@ namespace Game.Modules.Analytics
             
         }
 
-        public int Price
+        public float Price
         {
             set
             {

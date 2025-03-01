@@ -6,6 +6,7 @@ namespace Game.Modules.Analytics
     using Game.Runtime.Services.Analytics.Interfaces;
     using GameAnalyticsSDK;
     using Runtime.Services.Analytics;
+    using Runtime.Services.Analytics.Messages;
     using Runtime.Services.Analytics.Runtime;
     using Sirenix.OdinInspector;
     using UniGame.AddressableTools.Runtime;
@@ -65,12 +66,78 @@ namespace Game.Modules.Analytics
                 return;
             }
             
+            if(message is AdsEventMessage adsEventMessage)
+            {
+                TrackAdsEvent(adsEventMessage);
+                return;
+            }
+
+            if (message is GAProgressionEventMessage progressionEventMessage)
+            {
+                TrackProgression(progressionEventMessage);
+                return;
+            }
+            
             var parametersValue = new Dictionary<string, object>();
             foreach (var keyValue in message.Parameters)
                 parametersValue[keyValue.Key] = keyValue.Value;
             
             // send ad event
             GameAnalytics.NewDesignEvent(message.Name, parametersValue);
+        }
+        
+        public void TrackAdsEvent(AdsEventMessage message)
+        {
+            var adAction = GAAdAction.Undefined;
+            var adType = GAAdType.Undefined;
+
+            switch (message.AdsType)
+            {
+                case AnalyticsEventsNames.rewarded_video:
+                    adType = GAAdType.RewardedVideo;
+                    break;
+                case AnalyticsEventsNames.video:
+                    adType = GAAdType.Video;
+                    break;
+                case AnalyticsEventsNames.interstitial:
+                    adType = GAAdType.Interstitial;
+                    break;
+                case AnalyticsEventsNames.offer_wall:
+                    adType = GAAdType.OfferWall;
+                    break;
+                case AnalyticsEventsNames.banner:
+                    adType = GAAdType.Banner;
+                    break;
+                case AnalyticsEventsNames.playable:
+                    adType = GAAdType.Playable;
+                    break;
+                default:
+                    adType = GAAdType.RewardedVideo;
+                    break;
+            }
+            
+            GameAnalytics.NewAdEvent(adAction,adType,message.SdkName,message.Placement,message.AdsDuration);
+            
+        }
+
+        public void TrackProgression(GAProgressionEventMessage message)
+        {
+            var progressionStatus = GAProgressionStatus.Undefined;
+            switch (message.ProgressionStatus)
+            {
+                case GameAnalyticsConstants.complete:
+                    progressionStatus = GAProgressionStatus.Complete;
+                    break;
+                case GameAnalyticsConstants.fail:
+                    progressionStatus = GAProgressionStatus.Fail;
+                    break;
+                case GameAnalyticsConstants.start:
+                    progressionStatus = GAProgressionStatus.Start;
+                    break;
+            }
+            
+            GameAnalytics.NewProgressionEvent(
+                progressionStatus,message.Progression01,message.Progression02,message.Progression03,message.Score);
         }
 
         public void TrackGameResource(GameResourceFlowEventMessage message)
@@ -116,8 +183,9 @@ namespace Game.Modules.Analytics
             {
                 GameAnalytics.NewBusinessEventGooglePlay(
                     message.Currency,
-                    message.Price,message.
-                        ItemType,message.ItemId,
+                    (int)message.Price,
+                    message.ItemType,
+                    message.ItemId,
                     message.CartType,
                     message.Receipt,
                     message.Signature);
@@ -126,7 +194,7 @@ namespace Game.Modules.Analytics
 
 #endif
             
-            GameAnalytics.NewBusinessEvent(message.Currency, message.Price, message.ItemType,message.ItemId, message.CartType);
+            GameAnalytics.NewBusinessEvent(message.Currency, (int)message.Price, message.ItemType,message.ItemId, message.CartType);
         }
 
         public void SetupUserId(IAnalyticsMessage message)
