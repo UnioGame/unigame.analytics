@@ -44,14 +44,14 @@
         public const string banner = nameof(banner);
         
         //ads actions
-        public const string clicked = nameof(clicked);
-        public const string show = nameof(show);
-        public const string failed_show = nameof(failed_show);
-        public const string reward_received = nameof(reward_received);
-        public const string requested = nameof(requested);
-        public const string closed = nameof(closed);
+        public const string clicked     = nameof(clicked);
+        public const string opened      = nameof(opened);
+        public const string failed      = nameof(failed);
+        public const string rewarded    = nameof(rewarded);
+        public const string requested   = nameof(requested);
+        public const string closed      = nameof(closed);
         public const string unavailable = nameof(unavailable);
-        public const string available = nameof(available);
+        public const string available    = nameof(available);
         
         //===================COMMON===================
         /// <summary>

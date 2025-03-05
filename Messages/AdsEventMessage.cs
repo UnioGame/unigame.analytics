@@ -57,6 +57,7 @@ namespace Game.Runtime.Services.Analytics.Messages
 
         public string ActionType
         {
+            get => this[AnalyticsEventsNames.ads_action_type];
             set => this[AnalyticsEventsNames.ads_action_type] = value;
         }
         

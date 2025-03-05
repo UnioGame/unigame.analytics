@@ -75,7 +75,7 @@
         
         public override string ToString()
         {
-            return $"ANALYTICS EVENT: {JsonConvert.SerializeObject(this)}";
+            return JsonConvert.SerializeObject(parameters);
         }
     }
 }

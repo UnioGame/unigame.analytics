@@ -9,6 +9,7 @@ namespace Game.Modules.Analytics
     using Runtime.Services.Analytics.Messages;
     using Runtime.Services.Analytics.Runtime;
     using Sirenix.OdinInspector;
+    using UniCore.Runtime.ProfilerTools;
     using UniGame.AddressableTools.Runtime;
     using UniModules.UniCore.Runtime.DataFlow;
     using UnityEngine;
@@ -59,27 +60,41 @@ namespace Game.Modules.Analytics
                 return;
             
             SetupUserId(message);
+            
 
+            
             if(message is PaymentEventMessage { Name: AnalyticsEventsNames.payment_complete } purchaseMessage)
             {
+#if UNITY_EDITOR
+                LogGameAnalytics($"{nameof(PaymentEventMessage)} | {purchaseMessage}");
+#endif
                 TrackPurchase(purchaseMessage);
                 return;
             }
 
             if (message is GameResourceFlowEventMessage gameResourceEventMessage)
             {
+#if UNITY_EDITOR
+                LogGameAnalytics($"{nameof(GameResourceFlowEventMessage)} | {gameResourceEventMessage}");
+#endif
                 TrackGameResource(gameResourceEventMessage);
                 return;
             }
             
             if(message is AdsEventMessage adsEventMessage)
             {
+#if UNITY_EDITOR
+                LogGameAnalytics($"{nameof(AdsEventMessage)} | {adsEventMessage}");
+#endif
                 TrackAdsEvent(adsEventMessage);
                 return;
             }
 
             if (message is GAProgressionEventMessage progressionEventMessage)
             {
+#if UNITY_EDITOR
+                LogGameAnalytics($"{nameof(GAProgressionEventMessage)} | {progressionEventMessage}");
+#endif
                 TrackProgression(progressionEventMessage);
                 return;
             }
@@ -90,6 +105,10 @@ namespace Game.Modules.Analytics
             
             // send ad event
             GameAnalytics.NewDesignEvent(message.Name, parametersValue);
+
+#if UNITY_EDITOR
+            LogGameAnalytics($"NewDesignEvent | {message}");
+#endif
         }
         
         public void TrackAdsEvent(AdsEventMessage message)
@@ -121,9 +140,41 @@ namespace Game.Modules.Analytics
                     adType = GAAdType.RewardedVideo;
                     break;
             }
+
+            switch (message.ActionType)
+            {
+                case AnalyticsEventsNames.failed:
+                    adAction = GAAdAction.FailedShow;
+                    break;
+                case AnalyticsEventsNames.clicked:
+                    adAction = GAAdAction.Clicked;
+                    break;
+                case AnalyticsEventsNames.opened:
+                    adAction = GAAdAction.Show;
+                    break;
+                case AnalyticsEventsNames.rewarded:
+                    adAction = GAAdAction.RewardReceived;
+                    break;
+                case AnalyticsEventsNames.requested:
+                    adAction = GAAdAction.Request;
+                    break;
+                case AnalyticsEventsNames.closed:
+                    adAction = GAAdAction.Undefined;
+                    break;   
+                case AnalyticsEventsNames.unavailable:
+                    adAction = GAAdAction.Undefined;
+                    break;              
+                case AnalyticsEventsNames.available:
+                    adAction = GAAdAction.Loaded;
+                    break;               
+            }
             
-            GameAnalytics.NewAdEvent(adAction,adType,message.SdkName,message.Placement,message.AdsDuration);
-            
+            GameAnalytics.NewAdEvent(
+                adAction,
+                adType,
+                message.SdkName,
+                message.Placement,
+                message.AdsDuration);
         }
 
         public void TrackProgression(GAProgressionEventMessage message)
@@ -215,6 +266,11 @@ namespace Game.Modules.Analytics
                 GameAnalytics.SetCustomId(UserIdInfo);
         }
 
+        public void LogGameAnalytics(string message)
+        {
+            GameLog.Log($"GA ANALYTICS: {message}",Color.yellow);
+        }
+        
         public void Dispose() => _lifeTime?.Release();
 
         #region Game Analytics ATT Listener

@@ -21,7 +21,9 @@
 
         public void TrackEvent(IAnalyticsMessage message)
         {
-            GameLog.LogRuntime(message.ToString(),Color.yellow);
+#if GAME_DEBUG || UNITY_EDITOR
+            GameLog.LogRuntime($"ANALYTICS EVENT: {message}",Color.yellow);
+#endif
         }
     }
 }
