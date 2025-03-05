@@ -110,7 +110,8 @@
         public const string resource_cost = nameof(resource_cost);
         public const string resource_id = nameof(resource_id);
         public const string resource_get = nameof(resource_get);
-        public const string resource_receive = nameof(resource_receive);
+        public const string resource_item_type = nameof(resource_item_type);
+        public const string resource_item_id = nameof(resource_item_id);
         public const string resource_receive_value = nameof(resource_receive_value);
         public const string resource_spend = nameof(resource_spend);
         public const string resource_spend_value = nameof(resource_spend_value);

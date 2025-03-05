@@ -6,6 +6,7 @@
     using Interfaces;
     using UniGame.UniNodes.GameFlow.Runtime;
     using UniRx;
+    using UnityEngine;
 
     [Serializable]
     public class GameAnalyticsService : GameService, IAnalyticsService
@@ -70,7 +71,17 @@
         private void PublishToAdapters(IAnalyticsMessage message)
         {
             foreach (var adapter in _adapters)
-                adapter.TrackEvent(message);
+            {
+                try
+                {
+                    adapter.TrackEvent(message);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    continue;
+                }
+            }
         }
 
         private void CleanUp() => _adapters.Clear();

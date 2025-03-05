@@ -35,14 +35,14 @@ namespace Game.Runtime.Services.Analytics
         
         public string ItemType
         {
-            set => this[AnalyticsEventsNames.resource_receive] = value;
-            get => this[AnalyticsEventsNames.resource_receive];
+            set => this[AnalyticsEventsNames.resource_item_type] = value;
+            get => this[AnalyticsEventsNames.resource_item_type];
         }
         
         public string ItemId
         {
-            set => this[AnalyticsEventsNames.resource_receive] = value;
-            get => this[AnalyticsEventsNames.resource_receive];
+            set => this[AnalyticsEventsNames.resource_item_id] = value;
+            get => this[AnalyticsEventsNames.resource_item_id];
         }
 
     }
