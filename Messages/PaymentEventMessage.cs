@@ -73,25 +73,19 @@ namespace Game.Modules.Analytics
     [Serializable]
     public class PaymentAttemptingEventMessage : PaymentEventMessage
     {
-        public PaymentAttemptingEventMessage() : base(AnalyticsEventsNames.payment_attempting)
-        {
-        }
+        public PaymentAttemptingEventMessage() : base(AnalyticsEventsNames.payment_attempting) { }
     }
     
     [Serializable]
     public class PurchaseCompleteEventMessage : PaymentEventMessage
     {
-        public PurchaseCompleteEventMessage() : base(AnalyticsEventsNames.payment_complete)
-        {
-        }
+        public PurchaseCompleteEventMessage() : base(AnalyticsEventsNames.payment_complete) { }
     }
     
     [Serializable]
     public class PurchaseErrorEventMessage : PaymentEventMessage
     {
-        public PurchaseErrorEventMessage() : base(AnalyticsEventsNames.payment_error)
-        {
-        }
+        public PurchaseErrorEventMessage() : base(AnalyticsEventsNames.payment_error) { }
     }
     
     
