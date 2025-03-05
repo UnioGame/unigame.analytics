@@ -55,10 +55,16 @@ namespace Game.Runtime.Services.Analytics
         public GameResourceEventMessage(string eventName) 
             : base( eventName, AnalyticsEventsNames.game_resource_group) 
         {
-            ResourceType = string.Empty;
+            ResourceCurrency = string.Empty;
             ResourceSource = string.Empty;
         }
 
+        public string ResourceCurrency
+        {
+            set => this[AnalyticsEventsNames.resource_currency] = value;
+            get => this[AnalyticsEventsNames.resource_currency];
+        }
+        
         public string ResourceType
         {
             set => this[AnalyticsEventsNames.resource] = value;

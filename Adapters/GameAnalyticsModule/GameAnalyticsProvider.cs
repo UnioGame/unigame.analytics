@@ -215,7 +215,11 @@ namespace Game.Modules.Analytics
                     break;
             }
             
-            GameAnalytics.NewResourceEvent(gaFlowType,message.ResourceType,message.ResourceValue,message.ItemType,message.ItemId);
+            GameAnalytics.NewResourceEvent(gaFlowType,
+                message.ResourceCurrency,
+                message.ResourceValue,
+                message.ItemType,
+                message.ItemId);
         }
         
         public void TrackPurchase(PaymentEventMessage message)

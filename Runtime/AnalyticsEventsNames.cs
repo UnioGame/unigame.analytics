@@ -101,6 +101,7 @@
         
         // game resources parameters
         public const string resource = nameof(resource);
+        public const string resource_currency = nameof(resource_currency);
         public const string resource_value = nameof(resource_value);
         public const string resource_source = nameof(resource_source);
         public const string resource_flow_type = nameof(resource_flow_type);
