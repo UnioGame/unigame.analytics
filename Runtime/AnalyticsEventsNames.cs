@@ -6,6 +6,7 @@
         /// Groups
         /// </summary>
         public const string debug = nameof(debug);
+        public const string feature = nameof(feature);
         public const string general = nameof(general);
         public const string game_resource_group = nameof(game_resource_group);
         public const string ui_group = nameof(ui_group);
@@ -146,6 +147,14 @@
         public const string session_start = nameof(session_start);
         public const string scene_start = nameof(scene_start);
         
+        //====================Features===================
+        
+        //Promocodes
+        public const string promocode_result = nameof(promocode_result);
+        public const string promocode_error = nameof(promocode_error);
+        
+        public const string promocode = nameof(promocode);
+        public const string promocode_reward = nameof(promocode_reward);
         
         //===================UI===================
         /// <summary>
