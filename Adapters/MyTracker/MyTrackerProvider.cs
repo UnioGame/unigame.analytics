@@ -24,7 +24,7 @@ namespace VN.Runtime.Services
             if (string.IsNullOrEmpty(iOSKey))
             {
                 Debug.LogError("MyTrackerAnalytics iOSKey is empty!");
-                return;
+                return UniTask.CompletedTask;
             }
             MyTracker.Init(iOSKey);
             

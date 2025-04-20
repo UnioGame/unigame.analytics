@@ -232,7 +232,7 @@ namespace Game.Modules.Analytics
             if (!isReceiptEmpty)
             {
                 GameAnalytics.NewBusinessEventIOS(message.Currency,
-                    message.Price,message.
+                    (int)message.Price,message.
                     ItemType,message.ItemId,message.CartType,message.Receipt);
                 return;
             }
