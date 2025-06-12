@@ -3,7 +3,7 @@ namespace Game.Runtime.Services.Analytics
     using System;
     using Messages;
     using Runtime;
-    using UniModules.UniCore.Runtime.Utils;
+    using UniGame.Runtime.Utils;
 
     [Serializable]
     public class RequestResourceEventMessage : GameResourceEventMessage

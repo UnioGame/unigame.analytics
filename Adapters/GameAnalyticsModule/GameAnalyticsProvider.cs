@@ -11,7 +11,7 @@ namespace Game.Modules.Analytics
     using Sirenix.OdinInspector;
     using UniCore.Runtime.ProfilerTools;
     using UniGame.AddressableTools.Runtime;
-    using UniModules.UniCore.Runtime.DataFlow;
+    using UniGame.Runtime.DataFlow;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using Object = UnityEngine.Object;

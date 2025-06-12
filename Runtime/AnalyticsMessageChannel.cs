@@ -4,9 +4,10 @@
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using Interfaces;
-    using UniModules.UniCore.Runtime.Common;
-    using UniModules.UniCore.Runtime.DataFlow;
-    using UniRx;
+    using R3;
+    using UniGame.Runtime.Common;
+    using UniGame.Runtime.DataFlow;
+    using UniGame.Runtime.Rx;
     using UnityEngine;
 
     public class AnalyticsMessageChannel : IAnalyticsMessageChannel
@@ -26,20 +27,21 @@
         
         private List<IAnalyticsMessageHandler> _handlers = new();
 
-        private LifeTimeDefinition _lifeTime;
+        private LifeTime _lifeTime;
         private MessageBroker _broker;
         private Subject<IAnalyticsMessage> _messageSubject;
-        private IObservable<IAnalyticsMessage> _shareConnection;
+        private Observable<IAnalyticsMessage> _shareConnection;
 
         public AnalyticsMessageChannel()
         {
-            _lifeTime = new LifeTimeDefinition();
-            _broker = new MessageBroker().AddTo(_lifeTime);
-            _messageSubject = new Subject<IAnalyticsMessage>().AddTo(_lifeTime);
+            _lifeTime = new LifeTime();
+            _broker = LifetimeExtension.AddTo(new MessageBroker(), _lifeTime);
+            _messageSubject = new Subject<IAnalyticsMessage>();
+            RxLifetimeExtension.AddTo(_messageSubject, _lifeTime);
             _shareConnection = _messageSubject.Share();
         }
 
-        public void Dispose() => _lifeTime.Terminate();
+        public void Dispose() => _lifeTime.Release();
 
         public IDisposable RegisterMessageHandler(IAnalyticsMessageHandler handler)
         {
@@ -79,9 +81,9 @@
             _broker.Publish(message);
         }
 
-        public IObservable<T> Receive<T>() => _broker.Receive<T>();
+        public Observable<T> Receive<T>() => _broker.Receive<T>();
 
-        public IDisposable Subscribe(IObserver<IAnalyticsMessage> observer) => 
+        public IDisposable Subscribe(Observer<IAnalyticsMessage> observer) => 
             _shareConnection.Subscribe(observer);
 
         public async UniTask PublishMessageAsync(IAnalyticsMessage message)
@@ -92,6 +94,11 @@
                 message = await handler.UpdateMessageAsync(message);
 
             _messageSubject.OnNext(message);
+        }
+
+        public IDisposable Subscribe(IObserver<IAnalyticsMessage> observer)
+        {
+            return Subscribe(observer.ToObserver());
         }
     }
 }

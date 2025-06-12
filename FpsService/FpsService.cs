@@ -2,8 +2,8 @@ namespace Game.Runtime.Services.Analytics.FpsService
 {
     using System;
     using System.Linq;
+    using R3;
     using UniGame.UniNodes.GameFlow.Runtime;
-    using UniRx;
     using UnityEngine;
 
     [Serializable]
@@ -16,14 +16,14 @@ namespace Game.Runtime.Services.Analytics.FpsService
 
         public static float Fps;
         
-        public IReadOnlyReactiveProperty<float> CurrentFps { get; }
+        public ReadOnlyReactiveProperty<float> CurrentFps { get; }
 
         public FpsService()
         {
             CurrentFps = new ReactiveProperty<float>().AddTo(LifeTime);
             CurrentFps = Observable.EveryUpdate()
                 .Select(_ => Time.unscaledDeltaTime)
-                .Buffer(bufferSize, skipFrame)
+                .Chunk(bufferSize,skipFrame)
                 .Select(x => 1 / x.Average())
                 .Do(x => Fps = x)
                 .ToReadOnlyReactiveProperty();

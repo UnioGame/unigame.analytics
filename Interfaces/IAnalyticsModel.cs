@@ -1,11 +1,11 @@
 ﻿namespace Game.Runtime.Services.Analytics.Interfaces
 {
+    using R3;
     using UniGame.Core.Runtime;
-    using UniRx;
 
     public interface IAnalyticsModel : ILifeTimeContext
     {
-        IReactiveProperty<bool> IsDebug { get; }
+        ReactiveProperty<bool> IsDebug { get; }
 
         IAnalyticsMessageChannel MessageChannel { get; }
     }

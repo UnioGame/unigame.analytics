@@ -2,7 +2,7 @@ namespace Game.Runtime.Services.Analytics.Interfaces
 {
     using System;
     using Runtime;
-    using UniGame.GameFlow.Runtime.Interfaces;
+    using UniGame.GameFlow.Runtime;
 
     public interface IAnalyticsService : IGameService,IAnalyticsHandlers
     {

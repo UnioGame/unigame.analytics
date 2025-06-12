@@ -2,7 +2,7 @@ namespace Game.Runtime.Services.Analytics.Messages
 {
     using System;
     using System.Globalization;
-    using UniModules.UniCore.Runtime.Utils;
+    using UniGame.Runtime.Utils;
 
     [Serializable]
     public class AnalyticsIntValue

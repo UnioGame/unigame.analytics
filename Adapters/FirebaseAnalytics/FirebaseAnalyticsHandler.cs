@@ -8,9 +8,7 @@ namespace VN.Runtime.Services
     using Firebase;
     using Firebase.Analytics;
     using Game.Runtime.Services.Analytics.Interfaces;
-    using UniModules.UniCore.Runtime.DataFlow;
-    using UnityEngine;
-    using UnityEngine.Serialization;
+    using UniGame.Runtime.DataFlow;
 
     [Serializable]
     public sealed class FirebaseAnalyticsHandler: IAnalyticsAdapter

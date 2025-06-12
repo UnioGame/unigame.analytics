@@ -4,12 +4,12 @@
     using Cysharp.Threading.Tasks;
     using FpsService;
     using Interfaces;
+    using R3;
     using Runtime;
     using UniGame.AddressableTools.Runtime;
     using UniGame.AddressableTools.Runtime.AssetReferencies;
+    using UniGame.Context.Runtime;
     using UniGame.Core.Runtime;
-    using UniGame.GameFlow.Runtime.Services;
-    using UniRx;
     using UnityEngine;
 
     /// <summary>
@@ -22,17 +22,20 @@
 
         protected override async UniTask<IAnalyticsService> CreateInternalAsync(IContext context)
         {
+            var lifeTime = context.LifeTime;
             var configurationAsset = await configurationReference
                 .reference
-                .LoadAssetInstanceTaskAsync(LifeTime, true);
+                .LoadAssetInstanceTaskAsync(lifeTime, true);
             
             var configuration = configurationAsset.configuration;
             var channel = AnalyticsMessageChannel.DefaultChannel;
-            var service = CreateService(LifeTime);
+            var service = CreateService(lifeTime);
             
-            channel.Subscribe(service.TrackEvent).AddTo(LifeTime);
+            channel.ToObservable()
+                .Subscribe(service.TrackEvent)
+                .AddTo(lifeTime);
             
-            RegisterAdapters(service, configuration);
+            RegisterAdapters(service, configuration,lifeTime);
             
             foreach (var messageHandler in configuration.messageHandlers)
             {
@@ -48,19 +51,19 @@
             return service;
         }
 
-        private void RegisterAdapters(IAnalyticsService service,AnalyticsConfiguration configuration)
+        private void RegisterAdapters(IAnalyticsService service,AnalyticsConfiguration configuration, ILifeTime lifeTime)
         {
             foreach (var analyticsItem in configuration.analytics)
             {
                 if(analyticsItem.isEnabled == false)
                     continue;
-                InitializeAdapter(analyticsItem.adapter, service).Forget();
+                InitializeAdapter(analyticsItem.adapter, service,lifeTime).Forget();
             }
         }
 
-        private async UniTask InitializeAdapter(IAnalyticsAdapter adapter, IAnalyticsService service)
+        private async UniTask InitializeAdapter(IAnalyticsAdapter adapter, IAnalyticsService service,ILifeTime lifeTime)
         {
-            adapter.AddTo(LifeTime);
+            adapter.AddTo(lifeTime);
             await adapter.InitializeAsync();
             service.RegisterAdapter(adapter);
         }

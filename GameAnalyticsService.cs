@@ -4,8 +4,8 @@
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using Interfaces;
+    using R3;
     using UniGame.UniNodes.GameFlow.Runtime;
-    using UniRx;
     using UnityEngine;
 
     [Serializable]
@@ -65,7 +65,9 @@
         
         private void InitializeMessageChannel(IAnalyticsMessageChannel channel)
         {
-            channel.Subscribe(PublishToAdapters).AddTo(LifeTime);
+            channel.ToObservable()
+                .Subscribe(PublishToAdapters)
+                .AddTo(LifeTime);
         }
         
         private void PublishToAdapters(IAnalyticsMessage message)

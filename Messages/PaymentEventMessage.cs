@@ -3,7 +3,7 @@ namespace Game.Modules.Analytics
     using System;
     using Runtime.Services.Analytics.Messages;
     using Runtime.Services.Analytics.Runtime;
-    using UniModules.UniCore.Runtime.Utils;
+    using UniGame.Runtime.Utils;
 
     [Serializable]
     public class PaymentEventMessage : AnalyticsEventMessage

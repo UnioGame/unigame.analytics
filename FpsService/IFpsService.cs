@@ -1,10 +1,10 @@
 ﻿namespace Game.Runtime.Services.Analytics.FpsService
 {
-    using UniGame.GameFlow.Runtime.Interfaces;
-    using UniRx;
+    using R3;
+    using UniGame.GameFlow.Runtime;
 
     public interface IFpsService : IGameService
     {
-        IReadOnlyReactiveProperty<float> CurrentFps { get; }
+        ReadOnlyReactiveProperty<float> CurrentFps { get; }
     }
 }
