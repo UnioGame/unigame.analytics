@@ -5,7 +5,7 @@
     using Cysharp.Threading.Tasks;
     using Interfaces;
     using R3;
-    using UniGame.UniNodes.GameFlow.Runtime;
+    using UniGame.GameFlow.Runtime;
     using UnityEngine;
 
     [Serializable]

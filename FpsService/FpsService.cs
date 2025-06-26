@@ -3,7 +3,7 @@ namespace Game.Runtime.Services.Analytics.FpsService
     using System;
     using System.Linq;
     using R3;
-    using UniGame.UniNodes.GameFlow.Runtime;
+    using UniGame.GameFlow.Runtime;
     using UnityEngine;
 
     [Serializable]
