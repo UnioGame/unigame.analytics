@@ -60,7 +60,7 @@ namespace VN.Runtime.Services
 
         public void Dispose()
         {
-            _lifeTime.Release();
+            _lifeTime.Terminate();
         }
         
         public async UniTask<bool> WaitForInitialization()

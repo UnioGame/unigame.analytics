@@ -41,7 +41,7 @@
             _shareConnection = _messageSubject.Share();
         }
 
-        public void Dispose() => _lifeTime.Release();
+        public void Dispose() => _lifeTime.Terminate();
 
         public IDisposable RegisterMessageHandler(IAnalyticsMessageHandler handler)
         {

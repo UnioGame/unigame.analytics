@@ -35,7 +35,7 @@ namespace Game.Modules.Analytics
             if(Application.isEditor && !enableUnderEditor)
                 return;
             
-            _lifeTime?.Release();
+            _lifeTime?.Terminate();
             _lifeTime = new LifeTime();
             
             _gameAnalytics = await gameAnalyticsPrefab
@@ -275,7 +275,7 @@ namespace Game.Modules.Analytics
             GameLog.Log($"GA ANALYTICS: {message}",Color.yellow);
         }
         
-        public void Dispose() => _lifeTime?.Release();
+        public void Dispose() => _lifeTime?.Terminate();
 
         #region Game Analytics ATT Listener
 

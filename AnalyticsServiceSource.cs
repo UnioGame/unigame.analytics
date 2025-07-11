@@ -7,7 +7,6 @@
     using R3;
     using Runtime;
     using UniGame.AddressableTools.Runtime;
-    using UniGame.AddressableTools.Runtime.AssetReferencies;
     using UniGame.Context.Runtime;
     using UniGame.Core.Runtime;
     using UnityEngine;
