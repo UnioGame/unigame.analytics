@@ -24,7 +24,7 @@
             var lifeTime = context.LifeTime;
             var configurationAsset = await configurationReference
                 .reference
-                .LoadAssetInstanceTaskAsync(lifeTime, true);
+                .LoadAssetTaskAsync(lifeTime, true);
             
             var configuration = configurationAsset.configuration;
             var channel = AnalyticsMessageChannel.DefaultChannel;
