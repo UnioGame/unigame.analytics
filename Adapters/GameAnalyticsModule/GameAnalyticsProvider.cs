@@ -39,7 +39,7 @@ namespace UniGame.Runtime.Analytics.Adapters
             _lifeTime = new LifeTime();
             
             _gameAnalytics = await gameAnalyticsPrefab
-                .InstantiateTaskAsync<GameAnalytics>(_lifeTime,true);
+                .SpawnByReference<GameAnalytics>(_lifeTime, true);
             _gameAnalytics.gameObject.SetActive(true);
             
             Object.DontDestroyOnLoad(_gameAnalytics.gameObject);
