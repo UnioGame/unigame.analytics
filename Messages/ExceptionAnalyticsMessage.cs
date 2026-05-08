@@ -1,4 +1,4 @@
-namespace Game.Runtime.Services.Analytics.Messages
+namespace UniGame.Runtime.Analytics.Messages
 {
     using System;
     using Runtime;

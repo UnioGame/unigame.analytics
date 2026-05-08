@@ -185,10 +185,15 @@ public class GameBootstrap : MonoBehaviour
 public class AnalyticsConfiguration
 {
     public bool isEnabled = true;
+    public string platformIdOverride = string.Empty;
+    public List<string> enabledPlatforms = new();
+    public List<string> disabledPlatforms = new();
     public List<AnalyticsAdapterData> analytics = new();
     public List<IAnalyticsMessageHandler> messageHandlers = new();
 }
 ```
+
+`enabledPlatforms` and `disabledPlatforms` are applied before SDK initialization. The same platform allow/deny fields are also available on every `AnalyticsAdapterData`, so a build can globally disable analytics on platforms like YouTube Playables or disable only selected providers.
 
 ## Analytics Service
 
@@ -279,7 +284,12 @@ The module includes adapters for:
 - **Firebase Analytics**: Google Firebase Analytics
 - **Unity Analytics**: Unity's built-in analytics
 - **MyTracker**: VK MyTracker analytics
+- **AppMetrica**: AppMetrica event reporting
+- **Yandex Analytics**: Yandex Games metrica bridge
+- **MTT Analytics**: Custom `mtt.analytics` ingestion adapter with HMAC signing
 - **Debug Adapter**: Console logging for development
+
+Provider adapter assemblies are compile-gated. Use explicit project defines such as `UNITY_ANALYTICS_ENABLED`, `FIREBASE_ANALYTICS_ENABLED`, `GAME_ANALYTICS_ENABLED`, `MYTRACKER_ANALYTICS_ENABLED`, `APP_METRICA_ENABLED`, `YANDEX_ANALYTICS_ENABLED`, and `UNIGAME_ANALYTICS_ENABLED` together with the corresponding SDK packages.
 
 ### GameAnalytics Integration
 

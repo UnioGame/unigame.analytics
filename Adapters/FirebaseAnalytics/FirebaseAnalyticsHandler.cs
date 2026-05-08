@@ -1,13 +1,13 @@
 #if ANALYTICS_GOOGLE
 
-namespace VN.Runtime.Services
+namespace UniGame.Runtime.Analytics.Adapters
 {
     using System;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using Firebase;
     using Firebase.Analytics;
-    using Game.Runtime.Services.Analytics.Interfaces;
+    using UniGame.Runtime.Analytics.Interfaces;
     using UniGame.Runtime.DataFlow;
 
     [Serializable]
@@ -18,10 +18,9 @@ namespace VN.Runtime.Services
         private bool _initialized;
         private LifeTime _lifeTime = new();
         
-        public UniTask InitializeAsync()
+        public async UniTask InitializeAsync()
         {
-            
-            return UniTask.CompletedTask;
+            await WaitForInitialization();
         }
 
         public void TrackEvent(IAnalyticsMessage message)
@@ -75,7 +74,11 @@ namespace VN.Runtime.Services
                 var checkResult = await FirebaseApp.CheckDependenciesAsync()
                     .AsUniTask();
                 await UniTask.SwitchToMainThread();
-                if(checkResult != DependencyStatus.Available) continue;
+                if(checkResult != DependencyStatus.Available)
+                {
+                    await UniTask.DelayFrame(1, cancellationToken: _lifeTime.Token);
+                    continue;
+                }
                 _initialized = true;
             }
             

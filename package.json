@@ -1,7 +1,7 @@
 {
   "name": "com.unigame.analytics",
   "author": "UniGame",
-  "displayName": "UniGame Game Analytics",
+  "displayName": "UniGame Analytics",
   "description": "Game Analytics Module for Unity",
   "unity": "2023.1",
   "version": "2025.0.2",

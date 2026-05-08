@@ -1,4 +1,4 @@
-﻿namespace Game.Runtime.Services.Analytics.FpsService
+﻿namespace UniGame.Runtime.Analytics.FpsService
 {
     using R3;
     using UniGame.GameFlow.Runtime;

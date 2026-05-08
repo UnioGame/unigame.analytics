@@ -1,6 +1,7 @@
-﻿namespace Game.Runtime.Services.Analytics.Debug
+﻿namespace UniGame.Runtime.Analytics.Adapters
 {
     using System;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using Interfaces;
     using UniCore.Runtime.ProfilerTools;
@@ -21,8 +22,9 @@
 
         public void TrackEvent(IAnalyticsMessage message)
         {
-#if GAME_DEBUG || UNITY_EDITOR
-            GameLog.LogRuntime($"ANALYTICS EVENT: {message}",Color.yellow);
+#if GAME_DEBUG
+            var payload = string.Join(", ", message.Parameters.Select(static x => $"{x.Key}={x.Value}"));
+            GameLog.Log($"[Analytics] {message.Name} | {payload}",Color.chocolate);
 #endif
         }
     }

@@ -1,9 +1,9 @@
 {
-    "name": "game.analytics.adapter.firebase",
+    "name": "unigame.analytics.adapter",
     "rootNamespace": "",
     "references": [
-        "GUID:8e4577c9194c10845984cf27eb974fd1",
         "GUID:1c5a81befa27419fb889ccaa807ada8d",
+        "GUID:8e4577c9194c10845984cf27eb974fd1",
         "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [],
@@ -13,15 +13,8 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [
-        "FIREBASE_ANALYTICS_ENABLED",
-        "ANALYTICS_GOOGLE"
+        "UNIGAME_ANALYTICS_ENABLED"
     ],
-    "versionDefines": [
-        {
-            "name": "com.google.firebase.analytics",
-            "expression": "",
-            "define": "ANALYTICS_GOOGLE"
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }

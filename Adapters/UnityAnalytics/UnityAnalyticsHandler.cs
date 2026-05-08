@@ -1,4 +1,4 @@
-﻿namespace Game.Runtime.Services.Analytics.Adapters.UnityAnalytics
+﻿namespace UniGame.Runtime.Analytics.Adapters
 {
     using System;
     using Cysharp.Threading.Tasks;
@@ -6,6 +6,7 @@
     using Unity.Services.Core;
 
 #if ANALYTICS_UNITY
+
     using Unity.Services.Analytics;
 
     [Serializable]
@@ -24,7 +25,6 @@
                 unityEvent[parameter.Key] = parameter.Value;
             
             AnalyticsService.Instance.RecordEvent(unityEvent);
-            AnalyticsService.Instance.Flush();
         }
 
         public void Dispose()

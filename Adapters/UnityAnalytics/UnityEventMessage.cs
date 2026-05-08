@@ -1,4 +1,4 @@
-namespace Game.Runtime.Services.Analytics.Adapters.UnityAnalytics
+namespace UniGame.Runtime.Analytics.Adapters
 {
     using Event = Unity.Services.Analytics.Event;
 

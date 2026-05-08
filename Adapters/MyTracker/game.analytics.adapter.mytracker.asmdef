@@ -14,7 +14,10 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "MYTRACKER_ANALYTICS_ENABLED",
+        "ANALYTICS_MYTRACKER"
+    ],
     "versionDefines": [
         {
             "name": "com.mycom.tracker",

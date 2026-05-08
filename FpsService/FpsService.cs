@@ -1,4 +1,4 @@
-namespace Game.Runtime.Services.Analytics.FpsService
+namespace UniGame.Runtime.Analytics.FpsService
 {
     using System;
     using System.Linq;

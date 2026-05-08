@@ -1,7 +1,7 @@
-namespace Game.Modules.Analytics
+namespace UniGame.Runtime.Analytics.Adapters
 {
     using System;
-    using Runtime.Services.Analytics.Messages;
+    using UniGame.Runtime.Analytics.Messages;
 
     [Serializable]
     public class GAProgressionEventMessage : AnalyticsEventMessage

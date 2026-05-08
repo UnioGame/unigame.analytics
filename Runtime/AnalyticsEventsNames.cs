@@ -1,4 +1,4 @@
-﻿namespace Game.Runtime.Services.Analytics.Runtime
+﻿namespace UniGame.Runtime.Analytics.Runtime
 {
     public static class AnalyticsEventsNames
     {
@@ -141,7 +141,7 @@
         /// </summary>
         public const string first_open = nameof(first_open);
         public const string daily_reward_shown = nameof(daily_reward_shown);
-        public const string daily_reward_gain = nameof(daily_reward_shown);
+        public const string daily_reward_gain = nameof(daily_reward_gain);
         public const string login = nameof(login);
         public const string load_bootstrap = nameof(load_bootstrap);
         public const string session_start = nameof(session_start);

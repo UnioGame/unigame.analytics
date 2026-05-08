@@ -1,4 +1,4 @@
-﻿namespace Game.Runtime.Services.Analytics.Interfaces
+﻿namespace UniGame.Runtime.Analytics.Interfaces
 {
     using System;
 

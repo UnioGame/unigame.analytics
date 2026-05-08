@@ -1,4 +1,4 @@
-﻿namespace Game.Runtime.Services.Analytics.Runtime
+﻿namespace UniGame.Runtime.Analytics.Runtime
 {
     using Sirenix.OdinInspector;
     using UnityEngine;

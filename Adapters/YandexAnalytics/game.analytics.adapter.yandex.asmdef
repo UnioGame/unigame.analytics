@@ -1,0 +1,19 @@
+{
+    "name": "game.analytics.adapter.yandex",
+    "rootNamespace": "",
+    "references": [
+        "GUID:a0b431bd9232ee0439a3722ec36414ed",
+        "GUID:1c5a81befa27419fb889ccaa807ada8d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "YANDEX_ANALYTICS_ENABLED"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

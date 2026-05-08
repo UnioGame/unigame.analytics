@@ -1,4 +1,4 @@
-namespace Game.Modules.Analytics
+namespace UniGame.Runtime.Analytics.Adapters
 {
     public static class GameAnalyticsConstants
     {

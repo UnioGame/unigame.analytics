@@ -1,4 +1,4 @@
-﻿namespace Game.Runtime.Services.Analytics.Runtime
+﻿namespace UniGame.Runtime.Analytics.Runtime
 {
     using System;
     using System.Collections.Generic;
@@ -91,7 +91,16 @@
             if (_lifeTime.IsTerminated) return;
 
             foreach (var handler in _handlers)
-                message = await handler.UpdateMessageAsync(message);
+            {
+                try
+                {
+                    message = await handler.UpdateMessageAsync(message);
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception);
+                }
+            }
 
             _messageSubject.OnNext(message);
         }

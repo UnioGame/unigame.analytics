@@ -1,10 +1,10 @@
 #if ANALYTICS_MYTRACKER
 
-namespace VN.Runtime.Services
+namespace UniGame.Runtime.Analytics.Adapters
 {
     using System;
     using Cysharp.Threading.Tasks;
-    using Game.Runtime.Services.Analytics.Interfaces;
+    using UniGame.Runtime.Analytics.Interfaces;
     using Mycom.Tracker.Unity;
     using UnityEngine;
 

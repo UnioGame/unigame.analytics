@@ -1,8 +1,8 @@
 namespace Game.Modules.Analytics
 {
     using System;
-    using Runtime.Services.Analytics.Messages;
-    using Runtime.Services.Analytics.Runtime;
+    using UniGame.Runtime.Analytics.Messages;
+    using UniGame.Runtime.Analytics.Runtime;
     using UniGame.Runtime.Utils;
 
     [Serializable]

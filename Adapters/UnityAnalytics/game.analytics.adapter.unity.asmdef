@@ -16,6 +16,7 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [
+        "UNITY_ANALYTICS_ENABLED",
         "ANALYTICS_UNITY"
     ],
     "versionDefines": [

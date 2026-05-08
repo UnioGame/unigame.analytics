@@ -1,4 +1,4 @@
-﻿namespace Game.Runtime.Services.Analytics.Adapters
+﻿namespace UniGame.Runtime.Analytics
 {
     using System;
     using System.Collections.Generic;
@@ -13,9 +13,15 @@
     {
         private List<IAnalyticsAdapter> _adapters = new();
         private List<IAnalyticsMessageHandler> _handlers = new();
+
+        public GameAnalyticsService()
+        {
+            LifeTime.AddCleanUpAction(CleanUp);
+        }
         
         public void TrackEvent(IAnalyticsMessage message)
         {
+            if(LifeTime.IsTerminated) return;
             TrackEventAsync(message).Forget();
         }
 
@@ -43,6 +49,9 @@
 
         public IDisposable RegisterAdapter(IAnalyticsAdapter adapter)
         {
+            if(LifeTime.IsTerminated) 
+                return Disposable.Empty;
+            
             if (_adapters.Contains(adapter))
                 return Disposable.Empty;
 
@@ -59,7 +68,17 @@
         {
             var data = message;
             foreach (var handler in _handlers)
-                 data = await handler.UpdateMessageAsync(data);
+            {
+                try
+                {
+                    data = await handler.UpdateMessageAsync(data);
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception);
+                }
+            }
+
             PublishToAdapters(data);
         }
         

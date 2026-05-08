@@ -1,14 +1,14 @@
-namespace Game.Modules.Analytics
+namespace UniGame.Runtime.Analytics.Adapters
 {
     using System;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
-    using Game.Runtime.Services.Analytics.Interfaces;
     using GameAnalyticsSDK;
-    using Runtime.Services.Analytics;
-    using Runtime.Services.Analytics.Messages;
-    using Runtime.Services.Analytics.Runtime;
     using Sirenix.OdinInspector;
+    using UniGame.Runtime.Analytics;
+    using UniGame.Runtime.Analytics.Interfaces;
+    using UniGame.Runtime.Analytics.Messages;
+    using UniGame.Runtime.Analytics.Runtime;
     using UniCore.Runtime.ProfilerTools;
     using UniGame.AddressableTools.Runtime;
     using UniGame.Runtime.DataFlow;
