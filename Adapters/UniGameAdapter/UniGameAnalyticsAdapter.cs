@@ -11,7 +11,6 @@ namespace UniGame.Runtime.Analytics.Adapters
     using Interfaces;
     using Messages;
     using Newtonsoft.Json;
-    using R3;
     using Runtime;
     using UnityEngine;
     using UnityEngine.Networking;
