@@ -111,7 +111,9 @@ namespace UniGame.Runtime.Analytics.Adapters
                 ["user_id"] = GetValue(message, AnalyticsEventsNames.user_id, "unknown"),
                 ["session_id"] = GetValue(message, "session_id", "unknown"),
                 ["timestamp"] = long.TryParse(GetValue(message, "timestamp", "0"), out var timestamp) ? timestamp : DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                ["platform"] = GetValue(message, "platform", Application.platform.ToString().ToLowerInvariant()),
+                ["platform"] = GetValue(message, "platform", "unknown"),
+                ["backend_type"] = GetValue(message, "backend_type", "unknown"),
+                ["build"] = GetValue(message, "build", "unknown"),
                 ["app_version"] = GetValue(message, "app_version", Application.version),
                 ["properties"] = properties
             };
@@ -119,7 +121,16 @@ namespace UniGame.Runtime.Analytics.Adapters
 
         private static bool IsCommonParameter(string key)
         {
-            return key is "event_id" or AnalyticsEventsNames.user_id or "session_id" or "timestamp" or "platform" or "app_version" or AnalyticsEventsNames.event_name;
+            return key is
+                "event_id" or
+                AnalyticsEventsNames.user_id or
+                "session_id" or
+                "timestamp" or
+                "platform" or
+                "backend_type" or
+                "build" or
+                "app_version" or
+                AnalyticsEventsNames.event_name;
         }
 
         private static string GetValue(IAnalyticsMessage message, string key, string fallback)
