@@ -4,10 +4,14 @@ namespace UniGame.Runtime.Analytics.Adapters
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
+    using System.Text;
     using Cysharp.Threading.Tasks;
     using DataFlow;
     using Interfaces;
-    using Newtonsoft.Json.Linq;
+    using Messages;
+    using Newtonsoft.Json;
+    using R3;
     using Runtime;
     using UnityEngine;
     using UnityEngine.Networking;
@@ -24,13 +28,15 @@ namespace UniGame.Runtime.Analytics.Adapters
 
         public UniTask InitializeAsync()
         {
+            SendWorker().Forget();
             return UniTask.CompletedTask;
         }
 
         public void TrackEvent(IAnalyticsMessage message)
         {
             _queue.Enqueue(message);
-            var task = FlushAsync();
+            var task = SendWorker();
+            
             task.Forget();
         }
 
@@ -40,41 +46,46 @@ namespace UniGame.Runtime.Analytics.Adapters
             _queue.Clear();
         }
 
-        private async UniTask FlushAsync()
+        private async UniTask SendWorker()
         {
-            if (_isSending) return;
-
-            _isSending = true;
-            
-            try
+            while (!_lifetime.IsTerminated)
             {
-                while (_queue.Count > 0 && !_lifetime.IsTerminated)
+                if (_queue.Count == 0)
+                {
+                    await UniTask.Yield(_lifetime.Token);
+                    continue;
+                }
+                try
                 {
                     var message = _queue.Dequeue();
                     SendMessage(message).Forget();
                 }
-            }
-            finally
-            {
-                _isSending = false;
+                catch (Exception ex)
+                {
+                    Debug.LogError($"MTT analytics send worker error: {ex}");
+                    continue;
+                }
             }
         }
 
         private async UniTask<bool> SendMessage(IAnalyticsMessage message)
         {
-            while (!_lifetime.IsTerminated)
-            {
-                var status = await SendAsync(message);
-                if (status) return true;
-                await UniTask.Delay(retryDelayMilliseconds);
-            }
+            var status = await SendAsync(message);
+            if (status) return true;
+            
+            await UniTask.Delay(retryDelayMilliseconds);
+            
+            //return message back to queue
+            _queue.Enqueue(message);
             
             return false;
         }
 
         private async UniTask<bool> SendAsync(IAnalyticsMessage message)
         {
-            var body = System.Text.Encoding.UTF8.GetBytes(CreatePayload(message).ToString());
+            var transportMessage = CreateTransportMessage(message);
+            var payload = JsonConvert.SerializeObject(transportMessage);
+            var body = Encoding.UTF8.GetBytes(payload);
 
             using var request = new UnityWebRequest(endpoint, UnityWebRequest.kHttpVerbPOST)
             {
@@ -93,44 +104,41 @@ namespace UniGame.Runtime.Analytics.Adapters
             return false;
         }
 
-        private static JObject CreatePayload(IAnalyticsMessage message)
+        private static GameAnalyticsEventMessage CreateTransportMessage(IAnalyticsMessage message)
         {
-            var properties = new JObject();
+            if (message is GameAnalyticsEventMessage transportMessage)
+            {
+                ApplyFallbacks(transportMessage);
+                return transportMessage;
+            }
+
+            var transport = new GameAnalyticsEventMessage(message.Name, message.GroupId)
+            {
+                EventId = GetValue(message, "event_id", Guid.NewGuid().ToString("D")),
+                UserId = GetValue(message, AnalyticsEventsNames.user_id, "unknown"),
+                SessionId = GetValue(message, "session_id", "unknown"),
+                Timestamp = ResolveTimestamp(GetValue(message, "timestamp", string.Empty)),
+                Platform = GetValue(message, "platform", "unknown"),
+                BackendType = GetValue(message, "backend_type", "unknown"),
+                Build = GetValue(message, "build", "unknown"),
+                AppVersion = GetValue(message, "app_version", Application.version)
+            };
+
             foreach (var parameter in message.Parameters)
             {
                 if (IsCommonParameter(parameter.Key))
                     continue;
 
-                properties[parameter.Key] = ToJsonToken(parameter.Value);
+                transport.SetProperty(parameter.Key, ToJsonValue(parameter.Value));
             }
 
-            return new JObject
-            {
-                ["event_name"] = message.Name,
-                ["event_id"] = GetValue(message, "event_id", Guid.NewGuid().ToString("D")),
-                ["user_id"] = GetValue(message, AnalyticsEventsNames.user_id, "unknown"),
-                ["session_id"] = GetValue(message, "session_id", "unknown"),
-                ["timestamp"] = long.TryParse(GetValue(message, "timestamp", "0"), out var timestamp) ? timestamp : DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                ["platform"] = GetValue(message, "platform", "unknown"),
-                ["backend_type"] = GetValue(message, "backend_type", "unknown"),
-                ["build"] = GetValue(message, "build", "unknown"),
-                ["app_version"] = GetValue(message, "app_version", Application.version),
-                ["properties"] = properties
-            };
+            ApplyFallbacks(transport);
+            return transport;
         }
 
         private static bool IsCommonParameter(string key)
         {
-            return key is
-                "event_id" or
-                AnalyticsEventsNames.user_id or
-                "session_id" or
-                "timestamp" or
-                "platform" or
-                "backend_type" or
-                "build" or
-                "app_version" or
-                AnalyticsEventsNames.event_name;
+            return GameAnalyticsEventMessage.IsTransportParameter(key);
         }
 
         private static string GetValue(IAnalyticsMessage message, string key, string fallback)
@@ -139,12 +147,49 @@ namespace UniGame.Runtime.Analytics.Adapters
             return string.IsNullOrWhiteSpace(value) ? fallback : value;
         }
 
-        private static JToken ToJsonToken(string value)
+        private static long ResolveTimestamp(string value)
+        {
+            return long.TryParse(value, out var timestamp)
+                ? timestamp
+                : DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        private static void ApplyFallbacks(GameAnalyticsEventMessage message)
+        {
+            if (string.IsNullOrWhiteSpace(message.EventName))
+                message.EventName = AnalyticsEventsNames.other;
+
+            if (string.IsNullOrWhiteSpace(message.EventId))
+                message.EventId = Guid.NewGuid().ToString("D");
+
+            if (string.IsNullOrWhiteSpace(message.UserId))
+                message.UserId = "unknown";
+
+            if (string.IsNullOrWhiteSpace(message.SessionId))
+                message.SessionId = "unknown";
+
+            if (message.Timestamp <= 0)
+                message.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+            if (string.IsNullOrWhiteSpace(message.Platform))
+                message.Platform = "unknown";
+
+            if (string.IsNullOrWhiteSpace(message.BackendType))
+                message.BackendType = "unknown";
+
+            if (string.IsNullOrWhiteSpace(message.Build))
+                message.Build = "unknown";
+
+            if (string.IsNullOrWhiteSpace(message.AppVersion))
+                message.AppVersion = Application.version;
+        }
+
+        private static object ToJsonValue(string value)
         {
             if (long.TryParse(value, out var longValue))
                 return longValue;
 
-            if (double.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var doubleValue))
+            if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var doubleValue))
                 return doubleValue;
 
             if (bool.TryParse(value, out var boolValue))
