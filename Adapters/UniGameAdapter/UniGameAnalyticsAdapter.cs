@@ -20,10 +20,12 @@ namespace UniGame.Runtime.Analytics.Adapters
     {
         public string endpoint = "http://localhost:8080/v1/events";
         public int retryDelayMilliseconds = 1000;
-
+        public int retryCount = 5;
+        
         private bool _isSending;
         private readonly Queue<IAnalyticsMessage> _queue = new();
         private LifeTime  _lifetime = new();
+        private Dictionary<IAnalyticsMessage, int> _retryAttempts = new();
 
         public UniTask InitializeAsync()
         {
@@ -72,6 +74,17 @@ namespace UniGame.Runtime.Analytics.Adapters
             var status = await SendAsync(message);
             if (status) return true;
             
+            _retryAttempts.TryGetValue(message, out var attempts);
+            attempts++;
+            
+            if (retryCount > 0 && attempts > retryCount)
+            {
+                _retryAttempts.Remove(message);
+                return false;
+            }
+            
+            _retryAttempts[message] = attempts;
+            
             await UniTask.Delay(retryDelayMilliseconds);
             
             //return message back to queue
@@ -95,7 +108,7 @@ namespace UniGame.Runtime.Analytics.Adapters
             request.SetRequestHeader("Content-Type", "application/json");
 
             await request.SendWebRequest();
-
+            
             if (request.result == UnityWebRequest.Result.Success)
                 return true;
 
