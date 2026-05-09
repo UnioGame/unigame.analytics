@@ -115,13 +115,15 @@ namespace UniGame.Runtime.Analytics.Adapters
             var transport = new GameAnalyticsEventMessage(message.Name, message.GroupId)
             {
                 EventId = GetValue(message, "event_id", Guid.NewGuid().ToString("D")),
+                GroupId = GetValue(message, AnalyticsEventsNames.group_id, AnalyticsEventsNames.feature),
                 UserId = GetValue(message, AnalyticsEventsNames.user_id, "unknown"),
                 SessionId = GetValue(message, "session_id", "unknown"),
                 Timestamp = ResolveTimestamp(GetValue(message, "timestamp", string.Empty)),
                 Platform = GetValue(message, "platform", "unknown"),
                 BackendType = GetValue(message, "backend_type", "unknown"),
                 Build = GetValue(message, "build", "unknown"),
-                AppVersion = GetValue(message, "app_version", Application.version)
+                AppVersion = GetValue(message, "app_version", Application.version),
+                DeviceModel = GetValue(message, AnalyticsEventsNames.device_model, SystemInfo.deviceModel)
             };
 
             foreach (var parameter in message.Parameters)
@@ -168,6 +170,9 @@ namespace UniGame.Runtime.Analytics.Adapters
             if (string.IsNullOrWhiteSpace(message.SessionId))
                 message.SessionId = "unknown";
 
+            if (string.IsNullOrWhiteSpace(message.GroupId))
+                message.GroupId = AnalyticsEventsNames.feature;
+
             if (message.Timestamp <= 0)
                 message.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
@@ -182,6 +187,9 @@ namespace UniGame.Runtime.Analytics.Adapters
 
             if (string.IsNullOrWhiteSpace(message.AppVersion))
                 message.AppVersion = Application.version;
+
+            if (string.IsNullOrWhiteSpace(message.DeviceModel))
+                message.DeviceModel = SystemInfo.deviceModel;
         }
 
         private static object ToJsonValue(string value)

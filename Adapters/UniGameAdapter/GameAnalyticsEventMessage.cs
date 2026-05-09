@@ -83,6 +83,20 @@ namespace UniGame.Runtime.Analytics.Messages
             set => this["app_version"] = value;
         }
 
+        [JsonProperty("group_id")]
+        public string GroupId
+        {
+            get => this[AnalyticsEventsNames.group_id];
+            set => this[AnalyticsEventsNames.group_id] = value;
+        }
+
+        [JsonProperty("device_model")]
+        public string DeviceModel
+        {
+            get => this[AnalyticsEventsNames.device_model];
+            set => this[AnalyticsEventsNames.device_model] = value;
+        }
+
         [JsonProperty("properties")]
         public Dictionary<string, object> Properties => CreateSerializedProperties();
 
@@ -102,6 +116,8 @@ namespace UniGame.Runtime.Analytics.Messages
                 "backend_type" or
                 "build" or
                 "app_version" or
+                AnalyticsEventsNames.group_id or
+                AnalyticsEventsNames.device_model or
                 AnalyticsEventsNames.event_name;
         }
 
