@@ -135,6 +135,8 @@ namespace UniGame.Runtime.Analytics.Adapters
                 BackendType = GetValue(message, "backend_type", "unknown"),
                 Build = GetValue(message, "build", "unknown"),
                 AppVersion = GetValue(message, "app_version", Application.version),
+                AppId = GetValue(message, "app_id", Application.identifier),
+                DeviceId = GetValue(message, "device_id", SystemInfo.deviceUniqueIdentifier),
                 DeviceModel = GetValue(message, AnalyticsEventsNames.device_model, SystemInfo.deviceModel)
             };
 
@@ -199,6 +201,12 @@ namespace UniGame.Runtime.Analytics.Adapters
 
             if (string.IsNullOrWhiteSpace(message.AppVersion))
                 message.AppVersion = Application.version;
+
+            if (string.IsNullOrWhiteSpace(message.AppId))
+                message.AppId = Application.identifier;
+
+            if (string.IsNullOrWhiteSpace(message.DeviceId))
+                message.DeviceId = SystemInfo.deviceUniqueIdentifier;
 
             if (string.IsNullOrWhiteSpace(message.DeviceModel))
                 message.DeviceModel = SystemInfo.deviceModel;
