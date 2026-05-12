@@ -107,12 +107,27 @@ namespace UniGame.Runtime.Analytics.Adapters
 
             request.SetRequestHeader("Content-Type", "application/json");
 
-            await request.SendWebRequest();
+            try
+            {
+                var task = request.SendWebRequest();
+                var uniTask = task.ToUniTask();
+                await uniTask;
+            }
+            catch (Exception e)
+            {
+#if GAME_DEBUG
+                Debug.LogWarning($"MTT analytics event send failed: {e.Message} {request.responseCode} {request.error}");
+#endif
+                return false;
+            }
             
             if (request.result == UnityWebRequest.Result.Success)
                 return true;
 
+#if GAME_DEBUG
             Debug.LogWarning($"MTT analytics event send failed: {request.responseCode} {request.error}");
+#endif
+            
             return false;
         }
 
