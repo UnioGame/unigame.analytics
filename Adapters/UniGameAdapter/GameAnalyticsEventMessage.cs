@@ -112,12 +112,14 @@ namespace UniGame.Runtime.Analytics.Messages
         }
 
         [JsonProperty("properties")]
-        public Dictionary<string, object> Properties => CreateSerializedProperties();
+        public Dictionary<string, object> Properties => GetSerializedProperties();
 
         public void SetProperty(string key, object value)
         {
             _properties[key] = value;
         }
+
+        public bool HasProperties => _properties.Count > 0;
 
         public static bool IsTransportParameter(string key)
         {
@@ -143,22 +145,23 @@ namespace UniGame.Runtime.Analytics.Messages
                 _properties[property.Key] = property.Value;
         }
 
-        private Dictionary<string, object> CreateSerializedProperties()
+        private Dictionary<string, object> GetSerializedProperties()
         {
-            var properties = new Dictionary<string, object>(_properties);
+            if (_properties.Count > 0)
+                return _properties;
 
             foreach (var parameter in Parameters)
             {
                 if (IsTransportParameter(parameter.Key))
                     continue;
 
-                if (properties.ContainsKey(parameter.Key))
+                if (_properties.ContainsKey(parameter.Key))
                     continue;
 
-                properties[parameter.Key] = ToPropertyValue(parameter.Value);
+                _properties[parameter.Key] = ToPropertyValue(parameter.Value);
             }
 
-            return properties;
+            return _properties;
         }
 
         private static object ToPropertyValue(string value)

@@ -18,27 +18,43 @@ namespace UniGame.Runtime.Analytics.Adapters
     [Serializable]
     public sealed class UniGameAnalyticsAdapter : IAnalyticsAdapter
     {
+        private const int DrainBatchSize = 10;
+
         public string endpoint = "http://localhost:8080/v1/events";
+        public string batchEndpoint = "http://localhost:8080/v1/events/batch";
         public int retryDelayMilliseconds = 1000;
         public int retryCount = 5;
-        
-        private bool _isSending;
+        public Dictionary<string, string> requestHeaders = new();
+
+        private bool _workerStarted;
+        private bool _draining;
         private readonly Queue<IAnalyticsMessage> _queue = new();
-        private LifeTime  _lifetime = new();
+        private LifeTime _lifetime = new();
         private Dictionary<IAnalyticsMessage, int> _retryAttempts = new();
+        private readonly AnalyticsLocalEventCache _localCache = new();
 
         public UniTask InitializeAsync()
         {
-            SendWorker().Forget();
+            _localCache.Load();
+            EnsureWorker();
+            if (_localCache.Count > 0)
+                DrainCacheAsync().Forget();
             return UniTask.CompletedTask;
         }
 
         public void TrackEvent(IAnalyticsMessage message)
         {
             _queue.Enqueue(message);
-            var task = SendWorker();
-            
-            task.Forget();
+            EnsureWorker();
+        }
+
+        private void EnsureWorker()
+        {
+            if (_workerStarted)
+                return;
+
+            _workerStarted = true;
+            SendWorker().Forget();
         }
 
         public void Dispose()
@@ -71,47 +87,58 @@ namespace UniGame.Runtime.Analytics.Adapters
 
         private async UniTask<bool> SendMessage(IAnalyticsMessage message)
         {
-            var status = await SendAsync(message);
-            if (status) return true;
-            
+            var transportMessage = CreateTransportMessage(message);
+            var payload = JsonConvert.SerializeObject(transportMessage);
+            var status = await PostAsync(endpoint, payload);
+            if (status)
+            {
+                _retryAttempts.Remove(message);
+                if (_localCache.Count > 0)
+                    DrainCacheAsync().Forget();
+                return true;
+            }
+
             _retryAttempts.TryGetValue(message, out var attempts);
             attempts++;
-            
+
             if (retryCount > 0 && attempts > retryCount)
             {
                 _retryAttempts.Remove(message);
+                Debug.LogWarning(
+                    $"MTT analytics event dropped after {attempts} attempts, cached locally: {message.Name}");
+                _localCache.Append(payload);
                 return false;
             }
-            
+
             _retryAttempts[message] = attempts;
-            
+
             await UniTask.Delay(retryDelayMilliseconds);
-            
+
             //return message back to queue
             _queue.Enqueue(message);
-            
+
             return false;
         }
 
-        private async UniTask<bool> SendAsync(IAnalyticsMessage message)
+        private async UniTask<bool> PostAsync(string url, string payload)
         {
-            var transportMessage = CreateTransportMessage(message);
-            var payload = JsonConvert.SerializeObject(transportMessage);
+            if (string.IsNullOrWhiteSpace(url))
+                return false;
+
             var body = Encoding.UTF8.GetBytes(payload);
 
-            using var request = new UnityWebRequest(endpoint, UnityWebRequest.kHttpVerbPOST)
+            using var request = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST)
             {
                 uploadHandler = new UploadHandlerRaw(body),
                 downloadHandler = new DownloadHandlerBuffer()
             };
 
             request.SetRequestHeader("Content-Type", "application/json");
+            ApplyRequestHeaders(request);
 
             try
             {
-                var task = request.SendWebRequest();
-                var uniTask = task.ToUniTask();
-                await uniTask;
+                await request.SendWebRequest().ToUniTask();
             }
             catch (Exception e)
             {
@@ -120,15 +147,72 @@ namespace UniGame.Runtime.Analytics.Adapters
 #endif
                 return false;
             }
-            
+
             if (request.result == UnityWebRequest.Result.Success)
                 return true;
 
 #if GAME_DEBUG
             Debug.LogWarning($"MTT analytics event send failed: {request.responseCode} {request.error}");
 #endif
-            
+
             return false;
+        }
+
+        private async UniTask DrainCacheAsync()
+        {
+            if (_draining)
+                return;
+            if (_localCache.Count == 0)
+                return;
+            if (string.IsNullOrWhiteSpace(batchEndpoint))
+                return;
+
+            _draining = true;
+            try
+            {
+                while (!_lifetime.IsTerminated && _localCache.Count > 0)
+                {
+                    var batch = _localCache.Peek(DrainBatchSize);
+                    if (batch.Count == 0)
+                        break;
+
+                    var payload = BuildBatchPayload(batch);
+                    var ok = await PostAsync(batchEndpoint, payload);
+                    if (!ok)
+                        break;
+
+                    _localCache.RemoveProcessed(batch.Count);
+                }
+            }
+            finally
+            {
+                _draining = false;
+            }
+        }
+
+        private static string BuildBatchPayload(IReadOnlyList<string> events)
+        {
+            var builder = new StringBuilder(64 + events.Count * 64);
+            builder.Append("{\"events\":[");
+            for (var i = 0; i < events.Count; i++)
+            {
+                if (i > 0)
+                    builder.Append(',');
+                builder.Append(events[i]);
+            }
+            builder.Append("]}");
+            return builder.ToString();
+        }
+
+        private void ApplyRequestHeaders(UnityWebRequest request)
+        {
+            foreach (var header in requestHeaders)
+            {
+                if (string.IsNullOrWhiteSpace(header.Key) || string.IsNullOrWhiteSpace(header.Value))
+                    continue;
+
+                request.SetRequestHeader(header.Key, header.Value);
+            }
         }
 
         private static GameAnalyticsEventMessage CreateTransportMessage(IAnalyticsMessage message)

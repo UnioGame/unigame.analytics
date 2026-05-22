@@ -27,11 +27,14 @@
 
         public IDisposable RegisterMessageHandler(IAnalyticsMessageHandler handler)
         {
+            if (LifeTime.IsTerminated)
+                return Disposable.Empty;
+
             if (_handlers.Contains(handler))
                 return Disposable.Empty;
 
             _handlers.Add(handler);
-            
+
             return Disposable.Create(() =>
             {
                 if (_handlers.Contains(handler))
@@ -67,11 +70,11 @@
         private async UniTask TrackEventAsync(IAnalyticsMessage message)
         {
             var data = message;
-            foreach (var handler in _handlers)
+            for (var i = 0; i < _handlers.Count; i++)
             {
                 try
                 {
-                    data = await handler.UpdateMessageAsync(data);
+                    data = await _handlers[i].UpdateMessageAsync(data);
                 }
                 catch (Exception exception)
                 {
@@ -91,21 +94,24 @@
         
         private void PublishToAdapters(IAnalyticsMessage message)
         {
-            foreach (var adapter in _adapters)
+            for (var i = 0; i < _adapters.Count; i++)
             {
                 try
                 {
-                    adapter.TrackEvent(message);
+                    _adapters[i].TrackEvent(message);
                 }
                 catch (Exception e)
                 {
                     Debug.LogException(e);
-                    continue;
                 }
             }
         }
 
-        private void CleanUp() => _adapters.Clear();
+        private void CleanUp()
+        {
+            _adapters.Clear();
+            _handlers.Clear();
+        }
 
     }
 }
