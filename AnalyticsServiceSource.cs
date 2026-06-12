@@ -1,6 +1,5 @@
 ﻿namespace UniGame.Runtime.Analytics
 {
-    using Adapters;
     using Cysharp.Threading.Tasks;
     using FpsService;
     using Interfaces;
@@ -68,7 +67,8 @@
                 if (!analyticsItem.IsPlatformAllowed(platformId))
                     continue;
 
-                initializeTasks.Add(InitializeAdapter(analyticsItem.adapter, service, lifeTime));
+                var adapterTask = InitializeAdapter(analyticsItem.adapter, service, lifeTime);
+                initializeTasks.Add(adapterTask);
             }
 
             await UniTask.WhenAll(initializeTasks);
@@ -84,7 +84,7 @@
             }
             catch (System.Exception exception)
             {
-                UnityEngine.Debug.LogException(exception);
+                Debug.LogException(exception);
             }
         }
 
