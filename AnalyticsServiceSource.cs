@@ -1,5 +1,6 @@
 ﻿namespace UniGame.Runtime.Analytics
 {
+    using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using FpsService;
     using Interfaces;
@@ -58,10 +59,10 @@
             ILifeTime lifeTime,
             string platformId)
         {
-            var initializeTasks = new System.Collections.Generic.List<UniTask>();
+            var initializeTasks = new List<UniTask>();
             foreach (var analyticsItem in configuration.analytics)
             {
-                if (analyticsItem.isEnabled == false || analyticsItem.adapter == null)
+                if (!analyticsItem.isEnabled || analyticsItem.adapter == null)
                     continue;
 
                 if (!analyticsItem.IsPlatformAllowed(platformId))
