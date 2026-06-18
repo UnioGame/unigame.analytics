@@ -16,6 +16,7 @@ namespace UniGame.Runtime.Analytics.Adapters
     using Runtime;
     using UnityEngine;
     using UnityEngine.Networking;
+    using CompressionLevel = System.IO.Compression.CompressionLevel;
 
     [Serializable]
     public sealed class UniGameAnalyticsAdapter : IAnalyticsAdapter
