@@ -5,6 +5,8 @@ namespace UniGame.Runtime.Analytics.Adapters
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
+    using System.IO.Compression;
     using System.Text;
     using Cysharp.Threading.Tasks;
     using DataFlow;
@@ -19,18 +21,22 @@ namespace UniGame.Runtime.Analytics.Adapters
     public sealed class UniGameAnalyticsAdapter : IAnalyticsAdapter
     {
         private const int DrainBatchSize = 10;
+        private const int DefaultBatchDebounceMilliseconds = 5000;
+        private const int DefaultMaxBatchSize = 100;
 
         public string endpoint = "http://localhost:8080/v1/events";
         public string batchEndpoint = "http://localhost:8080/v1/events/batch";
         public int retryDelayMilliseconds = 1000;
         public int retryCount = 5;
+        public int batchDebounceMilliseconds = DefaultBatchDebounceMilliseconds;
+        public int maxBatchSize = DefaultMaxBatchSize;
+        public bool gzipEnabled = true;
         public Dictionary<string, string> requestHeaders = new();
 
         private bool _workerStarted;
         private bool _draining;
         private readonly Queue<IAnalyticsMessage> _queue = new();
         private LifeTime _lifetime = new();
-        private Dictionary<IAnalyticsMessage, int> _retryAttempts = new();
         private readonly AnalyticsLocalEventCache _localCache = new();
 
         public UniTask InitializeAsync()
@@ -59,6 +65,10 @@ namespace UniGame.Runtime.Analytics.Adapters
 
         public void Dispose()
         {
+            var batch = DequeueAvailableEvents(ResolveMaxBatchSize());
+            if (batch.Count > 0)
+                SendBatchWithRetry(batch).Forget();
+
             _lifetime.Terminate();
             _queue.Clear();
         }
@@ -72,10 +82,12 @@ namespace UniGame.Runtime.Analytics.Adapters
                     await UniTask.Yield(_lifetime.Token);
                     continue;
                 }
+
                 try
                 {
-                    var message = _queue.Dequeue();
-                    SendMessage(message).Forget();
+                    var batch = DequeueAvailableEvents(ResolveMaxBatchSize());
+                    await CollectDebouncedBatch(batch);
+                    await SendBatchWithRetry(batch);
                 }
                 catch (Exception ex)
                 {
@@ -85,39 +97,99 @@ namespace UniGame.Runtime.Analytics.Adapters
             }
         }
 
-        private async UniTask<bool> SendMessage(IAnalyticsMessage message)
+        private async UniTask CollectDebouncedBatch(List<string> batch)
         {
-            var transportMessage = CreateTransportMessage(message);
-            var payload = JsonConvert.SerializeObject(transportMessage);
-            var status = await PostAsync(endpoint, payload);
-            if (status)
+            var maxSize = ResolveMaxBatchSize();
+            var debounceMilliseconds = ResolveBatchDebounceMilliseconds();
+            var elapsedMilliseconds = 0;
+
+            while (!_lifetime.IsTerminated && batch.Count < maxSize && elapsedMilliseconds < debounceMilliseconds)
             {
-                _retryAttempts.Remove(message);
-                if (_localCache.Count > 0)
-                    DrainCacheAsync().Forget();
-                return true;
+                if (_queue.Count > 0)
+                {
+                    DrainQueuedMessages(batch, maxSize);
+                    continue;
+                }
+
+                var delay = Math.Min(50, debounceMilliseconds - elapsedMilliseconds);
+                if (delay <= 0)
+                    break;
+
+                await UniTask.Delay(delay);
+                elapsedMilliseconds += delay;
             }
+        }
 
-            _retryAttempts.TryGetValue(message, out var attempts);
-            attempts++;
-
-            if (retryCount > 0 && attempts > retryCount)
+        private async UniTask<bool> SendBatchWithRetry(IReadOnlyList<string> batch)
+        {
+            if (batch == null || batch.Count == 0)
+                return true;
+            if (string.IsNullOrWhiteSpace(batchEndpoint))
             {
-                _retryAttempts.Remove(message);
-                Debug.LogWarning(
-                    $"MTT analytics event dropped after {attempts} attempts, cached locally: {message.Name}");
-                _localCache.Append(payload);
+                CacheBatch(batch);
                 return false;
             }
 
-            _retryAttempts[message] = attempts;
+            var payload = BuildBatchPayload(batch);
+            var attempts = 0;
+            while (!_lifetime.IsTerminated)
+            {
+                var status = await PostAsync(batchEndpoint, payload);
+                if (status)
+                {
+                    if (_localCache.Count > 0)
+                        DrainCacheAsync().Forget();
+                    return true;
+                }
 
-            await UniTask.Delay(retryDelayMilliseconds);
+                attempts++;
+                if (retryCount > 0 && attempts > retryCount)
+                {
+                    CacheBatch(batch);
+                    Debug.LogWarning(
+                        $"MTT analytics batch dropped after {attempts} attempts, cached locally: {batch.Count} events");
+                    return false;
+                }
 
-            //return message back to queue
-            _queue.Enqueue(message);
+                if (_lifetime.IsTerminated)
+                    break;
 
+                try
+                {
+                    await UniTask.Delay(retryDelayMilliseconds, cancellationToken: _lifetime.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+
+            CacheBatch(batch);
             return false;
+        }
+
+        private List<string> DequeueAvailableEvents(int maxSize)
+        {
+            var batch = new List<string>(Math.Min(maxSize, Math.Max(1, _queue.Count)));
+            DrainQueuedMessages(batch, maxSize);
+            return batch;
+        }
+
+        private void DrainQueuedMessages(List<string> batch, int maxSize)
+        {
+            while (_queue.Count > 0 && batch.Count < maxSize)
+            {
+                var message = _queue.Dequeue();
+                var transportMessage = CreateTransportMessage(message);
+                var payload = JsonConvert.SerializeObject(transportMessage);
+                batch.Add(payload);
+            }
+        }
+
+        private void CacheBatch(IReadOnlyList<string> batch)
+        {
+            for (var i = 0; i < batch.Count; i++)
+                _localCache.Append(batch[i]);
         }
 
         private async UniTask<bool> PostAsync(string url, string payload)
@@ -125,7 +197,7 @@ namespace UniGame.Runtime.Analytics.Adapters
             if (string.IsNullOrWhiteSpace(url))
                 return false;
 
-            var body = Encoding.UTF8.GetBytes(payload);
+            var body = BuildRequestBody(payload, out var compressed);
 
             using var request = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST)
             {
@@ -134,6 +206,8 @@ namespace UniGame.Runtime.Analytics.Adapters
             };
 
             request.SetRequestHeader("Content-Type", "application/json");
+            if (compressed)
+                request.SetRequestHeader("Content-Encoding", "gzip");
             ApplyRequestHeaders(request);
 
             try
@@ -156,6 +230,37 @@ namespace UniGame.Runtime.Analytics.Adapters
 #endif
 
             return false;
+        }
+
+        private byte[] BuildRequestBody(string payload, out bool compressed)
+        {
+            var body = Encoding.UTF8.GetBytes(payload);
+            if (!gzipEnabled)
+            {
+                compressed = false;
+                return body;
+            }
+
+            compressed = true;
+            using var output = new MemoryStream();
+            using (var gzip = new GZipStream(output, CompressionLevel.Fastest, leaveOpen: true))
+                gzip.Write(body, 0, body.Length);
+
+            return output.ToArray();
+        }
+
+        private int ResolveBatchDebounceMilliseconds()
+        {
+            return batchDebounceMilliseconds > 0
+                ? batchDebounceMilliseconds
+                : DefaultBatchDebounceMilliseconds;
+        }
+
+        private int ResolveMaxBatchSize()
+        {
+            return maxBatchSize > 0
+                ? maxBatchSize
+                : DefaultMaxBatchSize;
         }
 
         private async UniTask DrainCacheAsync()
