@@ -15,13 +15,14 @@
     /// game analytics service
     /// </summary>
     [CreateAssetMenu(menuName = "Game/Services/Analytics/Analytics Service Source")]
-    public class AnalyticsServiceSource : DataSourceAsset<IAnalyticsService>
+    public class AnalyticsServiceSource : DataSourceAsset
     {
         public AddressableValue<AnalyticsConfigurationAsset> configurationReference;
 
-        protected override async UniTask<IAnalyticsService> CreateInternalAsync(IContext context)
+        protected override async UniTask<IContext> OnRegisterAsync(IContext context)
         {
             var lifeTime = context.LifeTime;
+            
             var configurationAsset = await configurationReference
                 .reference
                 .LoadAssetTaskAsync(lifeTime, true);
@@ -35,22 +36,22 @@
                 .Subscribe(service.TrackEvent)
                 .AddTo(lifeTime);
 
+            var fpsService = new FpsService.FpsService();
+
+            context.Publish(fpsService);
+            context.Publish<IFpsService>(fpsService);
+            context.Publish(channel);
+            context.Publish(service);
+            
             if (!configuration.isEnabled || !configuration.IsPlatformAllowed(platformId))
-            {
-                PublishCoreServices(context, channel);
-                return service;
-            }
+                return context;
             
             await RegisterAdapters(service, configuration, lifeTime, platformId);
             
             foreach (var messageHandler in configuration.messageHandlers)
-            {
                 service.RegisterMessageHandler(messageHandler);
-            }
             
-            PublishCoreServices(context, channel);
-
-            return service;
+            return context;
         }
 
         private async UniTask RegisterAdapters(
@@ -95,16 +96,7 @@
             var service = new GameAnalyticsService().AddTo(lifeTime);
             return service;
         }
-
-        private static void PublishCoreServices(IContext context, IAnalyticsMessageChannel channel)
-        {
-            var fpsService = new FpsService.FpsService();
-
-            context.Publish(fpsService);
-            context.Publish<IFpsService>(fpsService);
-            context.Publish(channel);
-        }
-
+        
         private static string ResolvePlatformId(AnalyticsConfiguration configuration)
         {
             if (!string.IsNullOrWhiteSpace(configuration.platformIdOverride))
@@ -118,5 +110,6 @@
                 _ => Application.platform.ToString().ToLowerInvariant()
             };
         }
+        
     }
 }
