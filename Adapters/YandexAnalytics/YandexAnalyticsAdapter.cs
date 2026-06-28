@@ -1,4 +1,5 @@
 #if YANDEX_ANALYTICS_ENABLED
+
 namespace UniGame.Runtime.Analytics.Adapters
 {
     using System;
