@@ -147,9 +147,6 @@ namespace UniGame.Runtime.Analytics.Messages
 
         private Dictionary<string, object> GetSerializedProperties()
         {
-            if (_properties.Count > 0)
-                return _properties;
-
             foreach (var parameter in Parameters)
             {
                 if (IsTransportParameter(parameter.Key))
