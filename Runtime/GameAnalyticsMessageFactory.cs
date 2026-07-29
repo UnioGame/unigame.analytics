@@ -1,10 +1,12 @@
 namespace UniGame.Runtime.Analytics.Runtime
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Globalization;
     using global::UniGame.Runtime.Analytics.Interfaces;
     using global::UniGame.Runtime.Analytics.Messages;
+    using Newtonsoft.Json;
 
     public static class GameAnalyticsMessageFactory
     {
@@ -41,6 +43,8 @@ namespace UniGame.Runtime.Analytics.Runtime
                 float floatValue => floatValue.ToString(CultureInfo.InvariantCulture),
                 double doubleValue => doubleValue.ToString(CultureInfo.InvariantCulture),
                 decimal decimalValue => decimalValue.ToString(CultureInfo.InvariantCulture),
+                string stringValue => stringValue,
+                IEnumerable enumerable => JsonConvert.SerializeObject(enumerable),
                 IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
                 _ => value.ToString()
             };
