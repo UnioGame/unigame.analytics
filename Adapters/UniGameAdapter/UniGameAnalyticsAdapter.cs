@@ -22,7 +22,7 @@ namespace UniGame.Runtime.Analytics.Adapters
     public sealed class UniGameAnalyticsAdapter : IAnalyticsAdapter
     {
         private const int DrainBatchSize = 10;
-        private const int DefaultBatchDebounceMilliseconds = 5000;
+        private const int DefaultBatchDebounceMilliseconds = 20000;
         private const int DefaultMaxBatchSize = 100;
 
         public string endpoint = "http://localhost:8080/v1/events";
